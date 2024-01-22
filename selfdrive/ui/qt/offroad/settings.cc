@@ -271,12 +271,13 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     addItem(regulatoryBtn);
   }
 
-
+#if 0
   # MJ changed code.
   # MJ Comments added :
   # 영문 menu 자리
   # 한글 번역은 main_ko.ts 에 있음
   # 여기에 한글로 추가
+#endif
   //const char* cal_ok = "sudo cp -f /data/openpilot/selfdrive/assets/CalibrationParams /data/params/d/";
   """
   Qt 애플리케이션에 버튼을 설정하고, 
