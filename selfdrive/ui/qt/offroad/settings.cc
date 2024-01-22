@@ -277,15 +277,14 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   # 영문 menu 자리
   # 한글 번역은 main_ko.ts 에 있음
   # 여기에 한글로 추가
+
+  Qt 애플리케이션에 버튼을 설정하고, 
+  클릭 시 사용자에게 확인을 요청한 다음 
+  특정 디렉토리로 캘리브레이션 파일을 강제로 복사하는 시스템 명령을 실행합니다. 
+  이 작업은 슈퍼유저 권한을 필요로 하며, 
+  주석에 따르면 테스트 목적으로 사용되며 실제 운전 전에 초기화해야 한다고 합니다.
 #endif
   //const char* cal_ok = "sudo cp -f /data/openpilot/selfdrive/assets/CalibrationParams /data/params/d/";
-  """
-  Qt 애플리케이션에 버튼을 설정하고, 
-   클릭 시 사용자에게 확인을 요청한 다음 
-   특정 디렉토리로 캘리브레이션 파일을 강제로 복사하는 시스템 명령을 실행합니다. 
-   이 작업은 슈퍼유저 권한을 필요로 하며, 
-   주석에 따르면 테스트 목적으로 사용되며 실제 운전 전에 초기화해야 한다고 합니다.
-  """
   auto calokbtn = new ButtonControl("캘리브레이션 강제 활성화", "실행");
   connect(calokbtn, &ButtonControl::clicked, [&]() {
       if (ConfirmationDialog::confirm(tr("캘리브레이션을 강제로 설정합니다. 인게이지 확인용이니 실 주행시에는 초기화 하시기 바랍니다"), tr("확인"), this)) {
