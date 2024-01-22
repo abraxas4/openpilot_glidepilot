@@ -15,14 +15,28 @@ EventName = car.CarEvent.EventName
 #  We recommend that you do not change these numbers from the defaults.
 # ******************************************************************************************
 
+# MJ
+PASSIVE_TIMEOUT = 9999.	# 30.
+ACTIVE_TIMEOUT = 9999.	# 11.
+
 class DRIVER_MONITOR_SETTINGS():
   def __init__(self):
     self._DT_DMON = DT_DMON
     # ref (page15-16): https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:42018X1947&rid=2
-    self._AWARENESS_TIME = 30. # passive wheeltouch total timeout
+
+    # MJ changed values
+    # MJ Comments added :
+    """
+      운전자 모니터링 타임아웃 설정이 변경되었습니다. 
+      이는 시스템의 행동을 변경할 수 있으며, 
+      예를 들어 운전자에게 잠재적인 산만함이나 차량 제어를 인계할 필요성에 대해 경고하기 전에 
+      시스템이 얼마나 오래 기다리는지에 영향을 줄 수 있습니다.
+    """
+    self._AWARENESS_TIME = PASSIVE_TIMEOUT # passive wheeltouch total timeout
     self._AWARENESS_PRE_TIME_TILL_TERMINAL = 15.
     self._AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.
-    self._DISTRACTED_TIME = 11. # active monitoring total timeout
+    self._DISTRACTED_TIME = ACTIVE_TIMEOUT # active monitoring total timeout
+
     self._DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
     self._DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
 

@@ -298,7 +298,35 @@ def thermald_thread(end_event, hw_queue) -> None:
     startup_conditions["time_valid"] = now > MIN_DATE
     set_offroad_alert_if_changed("Offroad_InvalidTime", (not startup_conditions["time_valid"]) and peripheral_panda_present)
 
-    startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get_bool("DisableUpdates") or params.get_bool("SnoozeUpdate")
+    # MJ changed code :
+    # MJ Comments added :
+    """
+      이 파이썬 코드 라인은 "up_to_date"라는 키를 가진 딕셔너리 엔트리의 값을 논리적 조건의 평가에 따라 설정하고 있습니다.
+    params.get("Offroad_ConnectivityNeeded") is None: 
+      이는 params.get("Offroad_ConnectivityNeeded")가 반환하는 값이 None인지를 확인합니다. 
+      만약 None이라면, 현재 시스템이 업데이트를 필요로 하지 않는다는 것을 나타낼 수 있으며, 
+      업데이트를 위한 연결 요구사항이 없음을 의미할 수 있습니다.
+
+    params.get_bool("DisableUpdates"): 
+    params 객체에서 "DisableUpdates" 키와 연관된 불리언 값이 True이면, 업데이트가 비활성화됨을 나타냅니다.
+
+    params.get_bool("SnoozeUpdate"): 
+    "SnoozeUpdate" 키와 연관된 불리언 값이 True이면, 업데이트 알림이 연기되었음을 나타냅니다.
+
+    Offroad_ConnectivityNeeded가 None이면 (업데이트를 확인하기 위한 연결이 필요하지 않음),
+      또는 DisableUpdates가 True이면 (업데이트가 비활성화됨),
+      또는 SnoozeUpdate가 True이면 (업데이트 알림이 연기됨).
+      다시 말해, startup_conditions["up_to_date"]는 
+      업데이트 확인을 위한 연결 요구사항이 없거나, 
+      업데이트가 의도적으로 비활성화되었거나, 
+      사용자가 업데이트를 연기하기로 결정한 경우 True가 됩니다. 
+      이는 소프트웨어 업데이트와 관련된 시작 순서 또는 조건 검사의 흐름을 제어하는 방법으로 보입니다.
+    """
+    # startup_conditions["up_to_date"] = (
+    #     params.get("Offroad_ConnectivityNeeded") is None or 
+    #     params.get_bool("DisableUpdates") or 
+    #     params.get_bool("SnoozeUpdate")
+    # )
     startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 

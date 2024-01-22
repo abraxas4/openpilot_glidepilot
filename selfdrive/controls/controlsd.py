@@ -424,10 +424,24 @@ class Controls:
 
     # TODO: fix simulator
     if not SIMULATION or REPLAY:
-      if not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
+      # MJ changed code.
+      # MJ Comments added :
+      """
+      GPS 신호 / 위치 추정 알고리즘(칼만 필터)에 대한 입력 데이터의 상태
+      GPS가 정상이 아니지만 칼만 필터의 입력은 정상이고 1km 이상 이동했는지를 확인
+      if ture, noGps 이벤트를 추가
+         이는 사용자에게 경고를 보내거나 문제를 로깅하기 위해 사용될 수 있습니다.
+      """
+      #if not self.sm['liveLocationKalman'].gpsOK and self.sm['liveLocationKalman'].inputsOK and (self.distance_traveled > 1000):
         # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
-        self.events.add(EventName.noGps)
+        #self.events.add(EventName.noGps)
 
+      """
+      모델 데이터의 프레임 드랍 비율(frameDropPerc)이 20%를 넘는지 확인합니다.
+      그렇다면, modeldLagging 이벤트를 추가하여 
+      비전 또는 기계 학습 모델이 지연되고 있음을 나타내며, 
+      이는 성능에 영향을 줄 수 있습니다.
+      """
       if self.sm['modelV2'].frameDropPerc > 20:
         self.events.add(EventName.modeldLagging)
 
@@ -707,6 +721,34 @@ class Controls:
 
     return CC, lac_log
 
+  # MJ commment added :
+  """
+  차량 상태 데이터 수집 (Data Collection):
+  CarState (CS), CarControl (CC), liveLocationKalman, longitudinalPlan 등의 변수를 통해 
+  차량의 속도, 스티어링 각도, 크루즈 컨트롤 상태 등과 같은 차량 상태 데이터를 수집합니다.
+
+  제어 명령 처리 (Control Commands Processing): 
+  수집된 데이터를 바탕으로 CarControl (CC) 객체 내의 명령을 생성하고 처리합니다. 
+  여기에는 크루즈 컨트롤 설정 (CC.cruiseControl), HUD 컨트롤 설정 (hudControl) 등이 포함됩니다.
+
+  경고 및 이벤트 처리 (Alerts and Events Handling): 
+  차량 상태에 따라 경고나 이벤트를 생성합니다. 
+  예를 들어, 차선 이탈 경고 (EventName.ldw) 이벤트를 self.events에 추가합니다.
+
+  통신 및 메시징 (Communication and Messaging):
+  messaging 라이브러리를 사용하여 생성된 데이터와 명령을 다른 시스템으로 전송합니다. 
+  예를 들어, self.pm.send('carControl', cc_send)를 통해 CarControl 메시지를 전송합니다.
+
+  실시간 피드백 제공 (Real-Time Feedback):
+  운전자에게 실시간 피드백을 제공합니다. 
+  이는 hudControl을 통한 HUD 디스플레이 정보 또는 오디오 경고를 통해 이루어집니다.
+
+  데이터 로깅 및 기록 (Data Logging and Recording):
+  차량 운행 중 발생하는 데이터와 이벤트를 기록하고 로깅합니다. 
+  이는 messaging 라이브러리를 사용하여 다양한 메시지 
+  ('controlsState', 'carState', 'onroadEvents' 등)로 기록되며, 
+  나중에 분석이나 문제 해결을 위해 사용됩니다.
+  """
   def publish_logs(self, CS, start_time, CC, lac_log):
     """Send actuators and hud commands to the car, send controlsstate and MPC logging"""
 
@@ -880,34 +922,55 @@ class Controls:
     # copy CarControl to pass to CarInterface on the next iteration
     self.CC = CC
 
+  # MJ commment added :   
+  """
+   차량 데이터 샘플링, 
+   이벤트 및 상태 전환 업데이트, 
+   제어 명령 계산, 그리고 
+   차량 제어 시스템을 위한 로그 정보 발행
+   을 조정하는 핵심 사이클을 실행합니다.
+  """ 
   def step(self):
-    start_time = time.monotonic()
-    self.prof.checkpoint("Ratekeeper", ignore=True)
+    # 현재 시간을 기록합니다.
+    start_time = time.monotonic() 
+    # 프로파일링 체크포인트를 설정합니다.
+    self.prof.checkpoint("Ratekeeper", ignore=True) 
 
     # Sample data from sockets and get a carState
-    CS = self.data_sample()
+    # 차량의 상태 데이터를 샘플링합니다.
+    CS = self.data_sample() 
     cloudlog.timestamp("Data sampled")
     self.prof.checkpoint("Sample")
 
-    self.update_events(CS)
+    # 차량 상태에 따라 발생하는 이벤트를 업데이트합니다.
+    self.update_events(CS)  
     cloudlog.timestamp("Events updated")
 
     if not self.CP.passive and self.initialized:
       # Update control state
-      self.state_transition(CS)
+      # 차량의 상태 전환 로직을 실행합니다.
+      self.state_transition(CS) 
       self.prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)
+    #  차량의 제어 상태를 계산하고, PID 루프와 수평 MPC를 실행합니다.
     CC, lac_log = self.state_control(CS)
 
     self.prof.checkpoint("State Control")
 
     # Publish data
+    # 로그 데이터를 발행합니다.
     self.publish_logs(CS, start_time, CC, lac_log)
     self.prof.checkpoint("Sent")
 
+    # 이전 차량 상태를 저장합니다.
     self.CS_prev = CS
 
+  """
+   이 함수는 시스템 설정을 주기적으로 체크하는 스레드입니다. 
+   예를 들어, IsMetric (미터법 사용 여부) 또는 ExperimentalMode (실험 모드 활성화 여부)와 같은 
+   설정 값을 업데이트합니다.
+  """
   def params_thread(self, evt):
     while not evt.is_set():
       self.is_metric = self.params.get_bool("IsMetric")
@@ -915,7 +978,12 @@ class Controls:
       if self.CP.notCar:
         self.joystick_mode = self.params.get_bool("JoystickDebugMode")
       time.sleep(0.1)
-
+  """
+   주요 제어 루프를 실행하는 스레드입니다. 
+   이 스레드는 step() 함수를 반복적으로 호출하여 
+   차량의 제어 상태를 지속적으로 업데이트하고, 
+   시스템이 정상적으로 작동하고 있는지 모니터링합니다.
+  """
   def controlsd_thread(self):
     e = threading.Event()
     t = threading.Thread(target=self.params_thread, args=(e, ))
@@ -929,7 +997,13 @@ class Controls:
       e.set()
       t.join()
 
-
+"""
+프로그램의 시작점으로, 
+Controls 클래스의 인스턴스를 생성하고 
+controlsd_thread를 실행합니다. 
+이 함수는 전체 제어 시스템을 초기화하고, 
+주 제어 루프를 시작하는 역할을 합니다.
+"""
 def main():
   controls = Controls()
   controls.controlsd_thread()
