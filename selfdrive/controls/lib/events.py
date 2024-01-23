@@ -144,7 +144,6 @@ class Alert:
 
 # MJ Comments added :
 # 한글화
-  
 class NoEntryAlert(Alert):
   def __init__(self, alert_text_2: str,
                alert_text_1: str = "openpilot Unavailable /\n 오픈파일럿 사용불가",
@@ -152,7 +151,6 @@ class NoEntryAlert(Alert):
     super().__init__(alert_text_1, alert_text_2, AlertStatus.normal,
                      AlertSize.mid, Priority.LOW, visual_alert,
                      AudibleAlert.refuse, 3.)
-
 
 class SoftDisableAlert(Alert):
   def __init__(self, alert_text_2: str):

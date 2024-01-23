@@ -843,6 +843,19 @@ class Controls:
     steer_angle_without_offset = math.radians(CS.steeringAngleDeg - lp.angleOffsetDeg)
     curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo, lp.roll)
 
+    # MJ Comments added :
+    '''
+    controlsState는 차량 제어 상태와 관련 경고를 담고 있는 데이터 구조로 보입니다. 
+    controlsState는 통신 채널을 통해 전송되기 위해 준비되고 있는 것처럼 보이며, 
+    아마도 이 경고들을 표시하는 UI 레이어나 다른 컴포넌트로 전송될 것입니다. 
+    값이 현재 경고의 속성에서 설정되고 있으므로, 이것이 실제로 UI로 경고 텍스트를 전달하는 방식임을 시사합니다.
+
+    경고 텍스트의 표시 방식을 변경하려면 (예를 들어 캔버스 크기 조정, 텍스트 줄바꿈 또는 글꼴 크기 변경 등), 
+    Openpilot이 사용하는 UI 코드 중 이 controlsState 속성을 해석하고 
+    화면에 텍스트를 렌더링하는 부분을 찾아야 합니다. 
+    Qt를 사용한다면 QML 파일이나 Openpilot이 사용하는 UI 프레임워크에
+    특정한 다른 유형의 템플릿 또는 렌더링 파일일 수 있습니다.
+    '''
     # controlsState
     dat = messaging.new_message('controlsState')
     dat.valid = CS.canValid

@@ -14,6 +14,7 @@
 #include "selfdrive/ui/qt/widgets/scrollview.h"
 
 AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent) {
+  //A vertical box layout is being created and set as the main layout for the alert frame.
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   main_layout->setMargin(50);
   main_layout->setSpacing(30);
@@ -27,6 +28,7 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
   QHBoxLayout *footer_layout = new QHBoxLayout();
   main_layout->addLayout(footer_layout);
 
+  //A button labeled "Close" is being created. This will likely be used to dismiss the alert.
   QPushButton *dismiss_btn = new QPushButton(tr("Close"));
   dismiss_btn->setFixedSize(400, 125);
   footer_layout->addWidget(dismiss_btn, 0, Qt::AlignBottom | Qt::AlignLeft);
@@ -40,15 +42,16 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
     params.putBool("SnoozeUpdate", true);
   });
   QObject::connect(snooze_btn, &QPushButton::clicked, this, &AbstractAlert::dismiss);
-  snooze_btn->setStyleSheet(R"(color: white; background-color: #4F4F4F;)");
+  snooze_btn->setStyleSheet(R"(color: white; background-color: #4F4F4F;)");           // thick gray
 
+  //A button for rebooting and updating is created if hasRebootBtn is true.
   if (hasRebootBtn) {
     QPushButton *rebootBtn = new QPushButton(tr("Reboot and Update"));
     rebootBtn->setFixedSize(600, 125);
     footer_layout->addWidget(rebootBtn, 0, Qt::AlignBottom | Qt::AlignRight);
     QObject::connect(rebootBtn, &QPushButton::clicked, [=]() { Hardware::reboot(); });
   }
-
+  //Styling is being applied to the alert frame and buttons using CSS-like syntax.
   setStyleSheet(R"(
     * {
       font-size: 48px;
@@ -56,7 +59,7 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
     }
     QFrame {
       border-radius: 30px;
-      background-color: #393939;
+      background-color: #393939;  /* dard greay */
     }
     QPushButton {
       color: black;
@@ -67,6 +70,10 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
   )");
 }
 
+// updating the contents of the offroad alerts
+//  It reads a JSON file with alert information,
+//  creates QLabel widgets for each alert,
+//  adds them to the scrollable layout.
 int OffroadAlert::refresh() {
   // build widgets for each offroad alert on first refresh
   if (alerts.empty()) {
@@ -111,6 +118,7 @@ int OffroadAlert::refresh() {
   return alertCount;
 }
 
+// creates an UpdateAlert, which is a specific type of AbstractAlert used for update notifications.
 UpdateAlert::UpdateAlert(QWidget *parent) : AbstractAlert(true, parent) {
   releaseNotes = new QLabel(this);
   releaseNotes->setWordWrap(true);
@@ -118,6 +126,7 @@ UpdateAlert::UpdateAlert(QWidget *parent) : AbstractAlert(true, parent) {
   scrollable_layout->addWidget(releaseNotes);
 }
 
+// checks if an update is available and updates the UI accordingly.
 bool UpdateAlert::refresh() {
   bool updateAvailable = params.getBool("UpdateAvailable");
   if (updateAvailable) {
