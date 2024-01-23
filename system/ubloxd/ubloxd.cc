@@ -15,6 +15,7 @@ int main() {
   AlignedBuffer aligned_buf;
   UbloxMsgParser parser;
 
+  // MJ
   PubMaster pm({"ubloxGnss", "gpsLocationExternal"});
 
   std::unique_ptr<Context> context(Context::create());

@@ -200,7 +200,9 @@ PubMaster: PubSocket을 사용하여 다양한 서비스로 메시지를 발행�
 AlignedBuffer: Cap'n Proto에서 예상하는 워드 경계에 데이터를 메모리에 정렬하는 데 도움을 주는 클래스입니다.
 
 Controls 클래스 내의 self.pm은 PubMaster의 인스턴스입니다. 
-        차량 제어와 관련된 다양한 메시지를 발행하는 데 사용됩니다. 예를 들어 'sendcan', 'controlsState', 'carState', 'carControl', 'onroadEvents', 'carParams'와 같은 정보를 포함한 메시지를 포함합니다. openpilot의 아키텍처에서 이러한 메시지는 차량 제어의 원하는 상태, 차량의 현재 상태, 도로에서 발생한 이벤트 및 차량의 파라미터 등의 정보를 포함할 수 있습니다.
+        차량 제어와 관련된 다양한 메시지를 발행하는 데 사용됩니다. 
+        예를 들어 'sendcan', 'controlsState', 'carState', 'carControl', 'onroadEvents', 'carParams'와 같은 정보를 포함한 메시지를 포함합니다. 
+        openpilot의 아키텍처에서 이러한 메시지는 차량 제어의 원하는 상태, 차량의 현재 상태, 도로에서 발생한 이벤트 및 차량의 파라미터 등의 정보를 포함할 수 있습니다.
 
 Controls 클래스는 self.pm을 초기화할 때 발행할 메시지의 토픽 목록을 사용하여 초기화합니다. 
         Controls 클래스가 메시지를 보내고자 할 때는 self.pm에 주제와 메시지를 보낼 메소드를 호출합니다.

@@ -17,6 +17,7 @@ def test_time_to_onroad():
   manager_path = os.path.join(BASEDIR, "selfdrive/manager/manager.py")
   proc = subprocess.Popen(["python", manager_path])
 
+  # MJ
   start_time = time.monotonic()
   sm = messaging.SubMaster(['controlsState', 'deviceState', 'onroadEvents'])
   try:

@@ -206,8 +206,28 @@ def get_display_speed(speed_ms: float, metric: bool) -> str:
   return f"{speed} {unit}"
 
 
-# ********** alert callback functions **********
+# MJ
+"""
+AlertCallbackType는 파이썬 코드에서 
+특정 인자를 받아 Alert 객체를 반환하는 콜백 함수의, 예상 형식을 지정하기 위한 타입 힌트입니다.
+구체적으로, AlertCallbackType은 다음과 같이 정의되어 있습니다:
+  Callable[[car.CarParams, car.CarState, messaging.SubMaster, bool, int], Alert]
 
+여기서 Callable은 특정 시그니처를 가진 호출 가능한 객체를 나타내는 내장 클래스입니다. 
+(즉, 함수나 람다 표현식과 같은 함수와 유사한 객체)
+
+AlertCallbackType은 다음 인자를 받고 Alert 객체를 반환합니다:
+  car.CarParams의 인스턴스
+  car.CarState의 인스턴스
+  messaging.SubMaster의 인스턴스
+  불리언 값
+  정수 값
+
+따라서, AlertCallbackType을 별도의 변수로 정의하면, 코드의 가독성과 유지보수성을 높일 수 있습니다. 
+개발자는 읽는 동안, 콜백 함수의 Expected Signature를 쉽게 이해할 수 있으며, 
+모든 IDE와 텍스트 편집기는, 타입 힌트를 사용하여 더 나은 자동 완성 제안과 오류 검사를 제공할 수 있습니다.
+"""
+# ********** alert callback functions **********
 AlertCallbackType = Callable[[car.CarParams, car.CarState, messaging.SubMaster, bool, int], Alert]
 
 
@@ -217,7 +237,7 @@ def soft_disable_alert(alert_text_2: str) -> AlertCallbackType:
       return ImmediateDisableAlert(alert_text_2)
     return SoftDisableAlert(alert_text_2)
   return func
-
+# MJ
 def user_soft_disable_alert(alert_text_2: str) -> AlertCallbackType:
   def func(CP: car.CarParams, CS: car.CarState, sm: messaging.SubMaster, metric: bool, soft_disable_time: int) -> Alert:
     if soft_disable_time < int(0.5 / DT_CTRL):
@@ -738,7 +758,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
     ET.SOFT_DISABLE: user_soft_disable_alert("Door Open / 도어 열림"),
     ET.NO_ENTRY: NoEntryAlert("Door Open / 도어 열림"),
   },
-  
+  # MJ
   EventName.seatbeltNotLatched: {
     ET.SOFT_DISABLE: user_soft_disable_alert("Seatbelt Unlatched /\n 안전벨트를 착용해주세요"),
     ET.NO_ENTRY: NoEntryAlert("Seatbelt Unlatched /\n 안전벨트를 착용해주세요"),

@@ -122,7 +122,8 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
   update_notif->setVisible(false);
   //MJ
   //update_notif->setStyleSheet("background-color: #364DEF;");
-  update_notif->setStyleSheet("background-color: orange;");
+  //update_notif->setStyleSheet("background-color: orange;");
+  update_notif->setStyleSheet("background-color: #ef36ca;");  
   QObject::connect(update_notif, &QPushButton::clicked, [=]() { center_layout->setCurrentIndex(1); });
   header_layout->addWidget(update_notif, 0, Qt::AlignHCenter | Qt::AlignLeft);
 

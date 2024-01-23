@@ -141,6 +141,7 @@ class Soundd:
     # sounddevice must be imported after forking processes
     import sounddevice as sd
 
+    # MJ
     sm = messaging.SubMaster(['controlsState', 'microphone'])
 
     with self.get_stream(sd) as stream:

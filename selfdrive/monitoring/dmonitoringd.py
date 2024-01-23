@@ -13,6 +13,7 @@ def dmonitoringd_thread():
   gc.disable()
   set_realtime_priority(2)
 
+  # MJ
   params = Params()
   pm = messaging.PubMaster(['driverMonitoringState'])
   sm = messaging.SubMaster(['driverStateV2', 'liveCalibration', 'carState', 'controlsState', 'modelV2'], poll=['driverStateV2'])
