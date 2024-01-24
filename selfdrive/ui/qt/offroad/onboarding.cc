@@ -174,6 +174,8 @@ void DeclinePage::showEvent(QShowEvent *event) {
 
   QPushButton *uninstall_btn = new QPushButton(tr("Decline, uninstall %1").arg(getBrand()));
   uninstall_btn->setStyleSheet("background-color: #B73D3D");  // MJ : red
+  // MJ test
+  uninstall_btn->setStyleSheet("background-color: #c932bd");  // MJ : pink - violet
   buttons->addWidget(uninstall_btn);
   QObject::connect(uninstall_btn, &QPushButton::clicked, [=]() {
     Params().putBool("DoUninstall", true);

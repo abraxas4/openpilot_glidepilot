@@ -330,13 +330,21 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   if (!Hardware::PC()) {
     connect(uiState(), &UIState::offroadTransition, poweroff_btn, &QPushButton::setVisible);
   }
-
+#if 1
+  setStyleSheet(R"(
+    #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }  // MJ : black
+    #reboot_btn:pressed { background-color: #4a4a4a; } // MJ : black (more grey)
+    #poweroff_btn { height: 120px; border-radius: 15px; background-color: ##f2079c; }  // MJ : pink
+    #poweroff_btn:pressed { background-color: ##f2079c; }  // MJ : pink
+  )");
+#else
   setStyleSheet(R"(
     #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }  // MJ : black
     #reboot_btn:pressed { background-color: #4a4a4a; } // MJ : black (more grey)
     #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }  // MJ : red
     #poweroff_btn:pressed { background-color: #FF2424; }  // MJ : red
   )");
+#endif
   addItem(power_layout);
 }
 
