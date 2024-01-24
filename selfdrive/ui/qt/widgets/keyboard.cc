@@ -61,10 +61,10 @@ KeyboardLayout::KeyboardLayout(QWidget* parent, const std::vector<QVector<QStrin
       } else if (p == ENTER_KEY) {
         btn->setStyleSheet(R"(
           QPushButton {
-            background-color: #465BEA;
+            background-color: #465BEA;  // MJ : blue
           }
           QPushButton:pressed {
-            background-color: #444444;
+            background-color: #444444;  // MJ : black
           }
         )");
       }
@@ -90,10 +90,10 @@ KeyboardLayout::KeyboardLayout(QWidget* parent, const std::vector<QVector<QStrin
       padding: 0px;
       border-radius: 10px;
       color: #dddddd;
-      background-color: #444444;
+      background-color: #444444;  // MJ : black
     }
     QPushButton:pressed {
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
   )").arg(key_spacing_vertical / 2).arg(key_spacing_horizontal / 2));
 }

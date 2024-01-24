@@ -209,7 +209,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
 
   // reset calibration button
   /*QPushButton *restart_openpilot_btn = new QPushButton(tr("Soft restart"));
-  restart_openpilot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  restart_openpilot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;"); // MJ : black
   reset_layout->addWidget(restart_openpilot_btn);
   QObject::connect(restart_openpilot_btn, &QPushButton::released, [=]() {
     emit closeSettings();
@@ -220,7 +220,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
 
   // reset calibration button
   QPushButton *reset_calib_btn = new QPushButton(tr("Reset Calibration"));
-  reset_calib_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
+  reset_calib_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;"); // MJ : black
   reset_layout->addWidget(reset_calib_btn);
   QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm(tr("Are you sure you want to reset calibration and live params?"), tr("Reset"), this)) {
@@ -332,10 +332,10 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   }
 
   setStyleSheet(R"(
-    #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }
-    #reboot_btn:pressed { background-color: #4a4a4a; }
-    #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }
-    #poweroff_btn:pressed { background-color: #FF2424; }
+    #reboot_btn { height: 120px; border-radius: 15px; background-color: #393939; }  // MJ : black
+    #reboot_btn:pressed { background-color: #4a4a4a; } // MJ : black (more grey)
+    #poweroff_btn { height: 120px; border-radius: 15px; background-color: #E22C2C; }  // MJ : red
+    #poweroff_btn:pressed { background-color: #FF2424; }  // MJ : red
   )");
   addItem(power_layout);
 }
@@ -421,10 +421,10 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       border-width: 0;
       border-radius: 30px;
       color: #dddddd;
-      background-color: #444444;
+      background-color: #444444;  // MJ : black
     }
     QPushButton:pressed {
-      background-color: #3B3B3B;
+      background-color: #3B3B3B;  // MJ : black
     }
   )");
   close_btn->setFixedSize(300, 110);
@@ -503,7 +503,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       background-color: black;
     }
     QStackedWidget, ScrollView {
-      background-color: #292929;
+      background-color: #292929;  // MJ : black
       border-radius: 30px;
     }
   )");
@@ -634,7 +634,7 @@ SelectCar::SelectCar(QWidget* parent): QWidget(parent) {
   main_layout->addWidget(back, 0, Qt::AlignLeft);
 
   QListWidget* list = new QListWidget(this);
-  list->setStyleSheet("QListView {padding: 40px; background-color: #393939; border-radius: 15px; height: 140px;} QListView::item{height: 100px}");
+  list->setStyleSheet("QListView {padding: 40px; background-color: #393939; border-radius: 15px; height: 140px;} QListView::item{height: 100px}"); // MJ : black
   //list->setAttribute(Qt::WA_AcceptTouchEvents, true);
   QScroller::grabGesture(list->viewport(), QScroller::LeftMouseButtonGesture);
   list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);

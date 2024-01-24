@@ -130,13 +130,13 @@ void TermsPage::showEvent(QShowEvent *event) {
   accept_btn->setEnabled(false);
   accept_btn->setStyleSheet(R"(
     QPushButton {
-      background-color: #465BEA;
+      background-color: #465BEA;  // MJ : blue
     }
     QPushButton:pressed {
-      background-color: #3049F4;
+      background-color: #3049F4;  // MJ : blue
     }
     QPushButton:disabled {
-      background-color: #4F4F4F;
+      background-color: #4F4F4F;  // Mj : grey (black)
     }
   )");
   buttons->addWidget(accept_btn);
@@ -173,7 +173,7 @@ void DeclinePage::showEvent(QShowEvent *event) {
   QObject::connect(back_btn, &QPushButton::clicked, this, &DeclinePage::getBack);
 
   QPushButton *uninstall_btn = new QPushButton(tr("Decline, uninstall %1").arg(getBrand()));
-  uninstall_btn->setStyleSheet("background-color: #B73D3D");
+  uninstall_btn->setStyleSheet("background-color: #B73D3D");  // MJ : red
   buttons->addWidget(uninstall_btn);
   QObject::connect(uninstall_btn, &QPushButton::clicked, [=]() {
     Params().putBool("DoUninstall", true);
@@ -227,7 +227,7 @@ OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
       font-size: 55px;
       font-weight: 400;
       border-radius: 10px;
-      background-color: #4F4F4F;
+      background-color: #4F4F4F;  // Mj : grey (black)
     }
   )");
   updateActiveScreen();

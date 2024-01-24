@@ -191,6 +191,7 @@ class Kernel:
     colors += ["cyan"] * self.local_dims
     # between first_reduce and first_reduce + group_for_reduce, they are either upcast mid reduce (white), or late upcasted (green)
     colors += ["white" if i in self.upcast_in_mid_reduce_axes else "green" for i in range(self.first_reduce, self.first_reduce + len(self.group_for_reduce))]
+    # MJ
     # between first_reduce + group_for_reduce and upcasted, they are reduce (red)
     colors += ["red"] * ((self.shape_len-self.upcasted) - (self.first_reduce + len(self.group_for_reduce)))
     # upcasted dimensions are reduce (magenta) or normal (yellow)

@@ -42,7 +42,7 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
     params.putBool("SnoozeUpdate", true);
   });
   QObject::connect(snooze_btn, &QPushButton::clicked, this, &AbstractAlert::dismiss);
-  snooze_btn->setStyleSheet(R"(color: white; background-color: #4F4F4F;)");           // thick gray
+  snooze_btn->setStyleSheet(R"(color: white; background-color: #4F4F4F;)");   // Mj : grey (black)
 
   //A button for rebooting and updating is created if hasRebootBtn is true.
   if (hasRebootBtn) {
@@ -59,7 +59,7 @@ AbstractAlert::AbstractAlert(bool hasRebootBtn, QWidget *parent) : QFrame(parent
     }
     QFrame {
       border-radius: 30px;
-      background-color: #393939;  /* dard greay */
+      background-color: #393939;  // MJ : black
     }
     QPushButton {
       color: black;
@@ -92,7 +92,7 @@ int OffroadAlert::refresh() {
       alerts[key] = l;
       l->setMargin(60);
       l->setWordWrap(true);
-      l->setStyleSheet(QString("background-color: %1").arg(severity ? "#E22C2C" : "#292929"));
+      l->setStyleSheet(QString("background-color: %1").arg(severity ? "#E22C2C" : "#292929"));  // MJ : black
       scrollable_layout->addWidget(l);
     }
     scrollable_layout->addStretch(1);

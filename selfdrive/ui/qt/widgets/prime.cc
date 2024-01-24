@@ -73,7 +73,7 @@ PairingPopup::PairingPopup(QWidget *parent) : DialogBase(parent) {
   hlayout->setContentsMargins(0, 0, 0, 0);
   hlayout->setSpacing(0);
 
-  setStyleSheet("PairingPopup { background-color: #E0E0E0; }");
+  setStyleSheet("PairingPopup { background-color: #E0E0E0; }"); // MJ : white
 
   // text
   QVBoxLayout *vlayout = new QVBoxLayout();
@@ -157,7 +157,7 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
 
   QVector<QString> bullets = {tr("Remote access"), tr("24/7 LTE connectivity"), tr("1 year of drive storage"), tr("Turn-by-turn navigation")};
   for (auto &b : bullets) {
-    const QString check = "<b><font color='#465BEA'>✓</font></b> ";
+    const QString check = "<b><font color='#465BEA'>✓</font></b> ";  // MJ : blue
     QLabel *l = new QLabel(check + b);
     l->setAlignment(Qt::AlignLeft);
     l->setStyleSheet("font-size: 50px; margin-bottom: 15px;");
@@ -167,7 +167,7 @@ PrimeAdWidget::PrimeAdWidget(QWidget* parent) : QFrame(parent) {
   setStyleSheet(R"(
     PrimeAdWidget {
       border-radius: 10px;
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
   )");
 }
@@ -201,11 +201,11 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
       font-size: 55px;
       font-weight: 500;
       border-radius: 10px;
-      background-color: #465BEA;
+      background-color: #465BEA;  // MJ : blue
       padding: 64px;
     }
     QPushButton:pressed {
-      background-color: #3049F4;
+      background-color: #3049F4;  // MJ : blue
     }
   )");
   finishRegistationLayout->addWidget(pair);
@@ -241,7 +241,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   setStyleSheet(R"(
     #primeWidget {
       border-radius: 10px;
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
   )");
 

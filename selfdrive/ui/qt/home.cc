@@ -120,17 +120,17 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
 
   update_notif = new QPushButton(tr("UPDATE"));
   update_notif->setVisible(false);
-  //MJ
-  //update_notif->setStyleSheet("background-color: #364DEF;");
+  // MJ test colors
+  //update_notif->setStyleSheet("background-color: #364DEF;");  // MJ : blue
   //update_notif->setStyleSheet("background-color: orange;");
-  update_notif->setStyleSheet("background-color: #ef36ca;");  
+  update_notif->setStyleSheet("background-color: #ef36ca;");    // MJ : pink
   QObject::connect(update_notif, &QPushButton::clicked, [=]() { center_layout->setCurrentIndex(1); });
   header_layout->addWidget(update_notif, 0, Qt::AlignHCenter | Qt::AlignLeft);
 
   alert_notif = new QPushButton();
   alert_notif->setVisible(false);
-  //MJ
-  //alert_notif->setStyleSheet("background-color: #E22C2C;");
+  //MJ tests colors
+  //alert_notif->setStyleSheet("background-color: #E22C2C;"); // MJ : red
   alert_notif->setStyleSheet("background-color: blue;");
   QObject::connect(alert_notif, &QPushButton::clicked, [=] { center_layout->setCurrentIndex(2); });
   header_layout->addWidget(alert_notif, 0, Qt::AlignHCenter | Qt::AlignLeft);

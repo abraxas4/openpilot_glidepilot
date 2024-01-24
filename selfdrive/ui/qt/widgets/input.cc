@@ -28,10 +28,10 @@ DialogBase::DialogBase(QWidget *parent) : QDialog(parent) {
       font-weight: 400;
       border-radius: 10px;
       color: white;
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
     QPushButton:pressed {
-      background-color: #444444;
+      background-color: #444444;  // MJ : black
     }
   )");
 }
@@ -74,11 +74,11 @@ InputDialog::InputDialog(const QString &title, QWidget *parent, const QString &s
     QPushButton {
       font-size: 48px;
       border-radius: 10px;
-      color: #E4E4E4;
-      background-color: #333333;
+      color: #E4E4E4;  // MJ : grey
+      background-color: #333333;  // MJ : black
     }
     QPushButton:pressed {
-      background-color: #444444;
+      background-color: #444444;  // MJ : black
     }
   )");
   header_layout->addWidget(cancel_btn, 0, Qt::AlignRight);
@@ -192,9 +192,9 @@ ConfirmationDialog::ConfirmationDialog(const QString &prompt_text, const QString
                                        const bool rich, QWidget *parent) : DialogBase(parent) {
   QFrame *container = new QFrame(this);
   container->setStyleSheet(R"(
-    QFrame { background-color: #1B1B1B; color: #C9C9C9; }
-    #confirm_btn { background-color: #465BEA; }
-    #confirm_btn:pressed { background-color: #3049F4; }
+    QFrame { background-color: #1B1B1B; color: #C9C9C9; } // MJ : white (little grey)
+    #confirm_btn { background-color: #465BEA; }  // MJ : blue
+    #confirm_btn:pressed { background-color: #3049F4; }  // MJ : blue
   )");
   QVBoxLayout *main_layout = new QVBoxLayout(container);
   main_layout->setContentsMargins(32, rich ? 32 : 120, 32, 32);
@@ -249,10 +249,10 @@ bool ConfirmationDialog::rich(const QString &prompt_text, QWidget *parent) {
 MultiOptionDialog::MultiOptionDialog(const QString &prompt_text, const QStringList &l, const QString &current, QWidget *parent) : DialogBase(parent) {
   QFrame *container = new QFrame(this);
   container->setStyleSheet(R"(
-    QFrame { background-color: #1B1B1B; }
-    #confirm_btn[enabled="false"] { background-color: #2B2B2B; }
-    #confirm_btn:enabled { background-color: #465BEA; }
-    #confirm_btn:enabled:pressed { background-color: #3049F4; }
+    QFrame { background-color: #1B1B1B; } // MJ : black
+    #confirm_btn[enabled="false"] { background-color: #2B2B2B; } // MJ : black
+    #confirm_btn:enabled { background-color: #465BEA; }  // MJ : blue
+    #confirm_btn:enabled:pressed { background-color: #3049F4; }  // MJ : blue
   )");
 
   QVBoxLayout *main_layout = new QVBoxLayout(container);
@@ -274,9 +274,9 @@ MultiOptionDialog::MultiOptionDialog(const QString &prompt_text, const QStringLi
       font-size: 55px;
       font-weight: 300;
       border-radius: 10px;
-      background-color: #4F4F4F;
+      background-color: #4F4F4F;  // Mj : grey (black)
     }
-    QPushButton:checked { background-color: #465BEA; }
+    QPushButton:checked { background-color: #465BEA; }  // MJ : blue
   )");
 
   QButtonGroup *group = new QButtonGroup(listWidget);

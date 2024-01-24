@@ -41,13 +41,14 @@ MapSettings::MapSettings(bool closeable, QWidget *parent) : QFrame(parent) {
           padding-bottom: 8px;
           border 1px grey solid;
           border-radius: 70px;
-          background-color: #292929;
+          background-color: #292929;   // MJ : black
           font-weight: 500;
         }
         QPushButton:pressed {
-          background-color: #3B3B3B;
+          background-color: #3B3B3B; // MJ : black
         }
       )");
+
       close_btn->setFixedSize(140, 140);
       QObject::connect(close_btn, &QPushButton::clicked, [=]() { emit closeSettings(); });
       // TODO: read map_on_left from ui state
@@ -91,7 +92,7 @@ MapSettings::MapSettings(bool closeable, QWidget *parent) : QFrame(parent) {
   destinations_scroller->setFrameShape(QFrame::NoFrame);
   frame->addWidget(destinations_scroller);
 
-  setStyleSheet("MapSettings { background-color: #333333; }");
+  setStyleSheet("MapSettings { background-color: #333333; }");  // MJ : black
   QObject::connect(NavManager::instance(), &NavManager::updated, this, &MapSettings::refresh);
 }
 
@@ -183,27 +184,29 @@ DestinationWidget::DestinationWidget(QWidget *parent) : QPushButton(parent) {
 
   setFixedHeight(164);
   setStyleSheet(R"(
-    DestinationWidget { background-color: #202123; border-radius: 10px; }
+    DestinationWidget { background-color: #202123; border-radius: 10px; } // MJ : 202123 : black
     QLabel { color: #FFFFFF; font-size: 48px; font-weight: 400; }
-    #icon { background-color: #3B4356; border-radius: 48px; }
-    #subtitle { color: #9BA0A5; }
+    #icon { background-color: #3B4356; border-radius: 48px; } // MJ : 3B4356 : bule black
+    #subtitle { color: #9BA0A5; }  // MJ : 9BA0A5 : grey
     #action { border: none; border-radius: 48px; color: #FFFFFF; padding-bottom: 4px; }
 
     /* current destination */
-    [current="true"] { background-color: #E8E8E8; }
+    [current="true"] { background-color: #E8E8E8; }  // MJ : E8E8E8 : white
     [current="true"] QLabel { color: #000000; }
-    [current="true"] #icon { background-color: #42906B; }
-    [current="true"] #subtitle { color: #333333; }
+    [current="true"] #icon { background-color: #42906B; }  // MJ : 42906B : green
+    [current="true"] #subtitle { color: #333333; }  // MJ : black
     [current="true"] #action { color: #202123; }
 
     /* no saved destination */
-    [set="false"] QLabel { color: #9BA0A5; }
+    [set="false"] QLabel { color: #9BA0A5; }  // MJ : 9BA0A5 : grey
     [current="true"][set="false"] QLabel { color: #A0000000; }
 
     /* pressed */
-    [current="false"]:pressed { background-color: #18191B; }
-    [current="true"] #action:pressed { background-color: #D6D6D6; }
+    [current="false"]:pressed { background-color: #18191B; }// MJ : 18191B : black
+    [current="true"] #action:pressed { background-color: #D6D6D6; } // MJ : D6D6D6 : white (little grey)
   )");
+  // MJ : border-radius: 10px : A higher value results in rounder corners, whereas lower values result in sharper corners.
+
   QObject::connect(this, &QPushButton::clicked, [this]() { if (!dest.isEmpty()) emit navigateTo(dest); });
 }
 

@@ -183,7 +183,7 @@ QWidget * Setup::network_setup() {
 
   // wifi widget
   Networking *networking = new Networking(this, false);
-  networking->setStyleSheet("Networking {background-color: #292929; border-radius: 13px;}");
+  networking->setStyleSheet("Networking {background-color: #292929; border-radius: 13px;}");  // MJ : black
   main_layout->addWidget(networking, 1);
 
   main_layout->addSpacing(35);
@@ -361,20 +361,20 @@ Setup::Setup(QWidget *parent) : QStackedWidget(parent) {
       font-size: 55px;
       font-weight: 400;
       border-radius: 10px;
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
     QPushButton#navBtn:disabled, QPushButton[primary='true']:disabled {
       color: #808080;
-      background-color: #333333;
+      background-color: #333333;  // MJ : black
     }
     QPushButton#navBtn:pressed {
-      background-color: #444444;
+      background-color: #444444;  // MJ : black
     }
     QPushButton[primary='true'], #navBtn[primary='true'] {
-      background-color: #465BEA;
+      background-color: #465BEA;  // MJ : blue
     }
     QPushButton[primary='true']:pressed, #navBtn:pressed[primary='true'] {
-      background-color: #3049F4;
+      background-color: #3049F4;  // MJ : blue
     }
   )");
 }

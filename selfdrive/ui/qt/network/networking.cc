@@ -63,10 +63,10 @@ Networking::Networking(QWidget* parent, bool show_advanced) : QFrame(parent) {
       border-width: 0;
       border-radius: 30px;
       color: #dddddd;
-      background-color: #393939;
+      background-color: #393939;  // MJ : black
     }
     #back_btn:pressed, #advanced_btn:pressed {
-      background-color:  #4a4a4a;
+      background-color:  #4a4a4a; // MJ : black (more grey)
     }
   )");
   main_layout->setCurrentWidget(wifiScreen);
@@ -234,21 +234,21 @@ WifiUI::WifiUI(QWidget *parent, WifiManager* wifi) : QWidget(parent), wifi(wifi)
     QScrollBar::handle:vertical {
       min-height: 0px;
       border-radius: 4px;
-      background-color: #8A8A8A;
+      background-color: #8A8A8A;  // MJ : grey (white)
     }
     #forgetBtn {
       font-size: 32px;
       font-weight: 600;
-      color: #292929;
-      background-color: #BDBDBD;
-      border-width: 1px solid #828282;
+      color: #292929;  // MJ : black
+      background-color: #BDBDBD;        // MJ : grey (more white)
+      border-width: 1px solid #828282;  // MJ : grey
       border-radius: 5px;
       padding: 40px;
       padding-bottom: 16px;
       padding-top: 16px;
     }
     #forgetBtn:pressed {
-      background-color: #828282;
+      background-color: #828282;        // MJ : grey
     }
     #connecting {
       font-size: 32px;
@@ -271,6 +271,7 @@ WifiUI::WifiUI(QWidget *parent, WifiManager* wifi) : QWidget(parent), wifi(wifi)
     }
   )");
 }
+
 
 void WifiUI::refresh() {
   bool is_empty = wifi->seenNetworks.isEmpty();

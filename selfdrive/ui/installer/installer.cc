@@ -87,10 +87,10 @@ Installer::Installer(QWidget *parent) : QWidget(parent) {
     }
     QProgressBar {
       border: none;
-      background-color: #292929;
+      background-color: #292929;  // MJ : black
     }
     QProgressBar::chunk {
-      background-color: #364DEF;
+      background-color: #364DEF;  // MJ : blue
     }
   )");
 }
