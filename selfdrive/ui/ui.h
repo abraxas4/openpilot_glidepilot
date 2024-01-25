@@ -48,6 +48,8 @@ constexpr vec3 default_face_kpts_3d[] = {
   {18.02, -49.14, 8.00}, {6.36, -51.20, 8.00}, {-5.98, -51.20, 8.00},
 };
 
+// MJ : struct Alert 
+// text messages, alert type, size, status, and audible alert.
 struct Alert {
   QString text1;
   QString text2;
@@ -60,11 +62,17 @@ struct Alert {
     return text1 == a2.text1 && text2 == a2.text2 && type == a2.type && sound == a2.sound;
   }
 
+  // MJ
+  // input 1 : a shared memory object containing control states received from another process.
+  // input 2 : the starting frame number when monitoring the alert.
   static Alert get(const SubMaster &sm, uint64_t started_frame) {
-    const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState();
-    const uint64_t controls_frame = sm.rcv_frame("controlsState");
+    const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState(); // MJ
+    const uint64_t controls_frame = sm.rcv_frame("controlsState");  // MJ : the reception timestamp of the latest available Control State
 
     Alert alert = {};
+    // MJ
+    // controls_frame keeps track of the latest Control State frame number, 
+    // whereas started_frame indicates the reference point for updating the alert information.
     if (controls_frame >= started_frame) {  // Don't get old alert.
       alert = {cs.getAlertText1().cStr(), cs.getAlertText2().cStr(),
                cs.getAlertType().cStr(), cs.getAlertSize(),

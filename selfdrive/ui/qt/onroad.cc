@@ -585,6 +585,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
     drawLead(p, lead_one, s->scene.lead_vertices[0], s->scene.lead_radar[0]);
   }
 
+  // MJ : HUD Speed
   drawMaxSpeed(p);
   drawSpeed(p);
   drawSteer(p);
@@ -630,7 +631,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
 
   drawBottomIcons(p);
 }
-
+// MJ : color during accel/decel
 void AnnotatedCameraWidget::drawSpeed(QPainter &p) {
   p.save();
   UIState *s = uiState();
@@ -639,19 +640,27 @@ void AnnotatedCameraWidget::drawSpeed(QPainter &p) {
   auto car_state = sm["carState"].getCarState();
   float accel = car_state.getAEgo();
 
+  #if 0  
+  코드는 투명도가 있는 기본 흰색을 정의한 다음 
+  차량의 가속도에 따라 "속도 표시의 색상"이 변하는, 시각적 효과를 만들고 있습니다. 
+  차량이 가속할 때(accel > 0), 색상은 파란색조로 변하고, (a, a, 255, 230)
+  차량이 감속할 때(accel < 0), 색상은 붉은색조로 변합니다. (255, a, a, 230)
+  4번째 값 : 0 == 투명 / 255 == 불투명
+  #endif
+
   QColor color = QColor(255, 255, 255, 230);
 
   if(accel > 0) {
     int a = (int)(255.f - (180.f * (accel/2.f)));
     a = std::min(a, 255);
     a = std::max(a, 80);
-    color = QColor(a, a, 255, 230);
+    color = QColor(a, a, 255, 230); // MJ : color : bluish
   }
   else {
     int a = (int)(255.f - (255.f * (-accel/3.f)));
     a = std::min(a, 255);
     a = std::max(a, 60);
-    color = QColor(255, a, a, 230);
+    color = QColor(255, a, a, 230); // MJ : color : reddish
   }
 
   QString speed;
