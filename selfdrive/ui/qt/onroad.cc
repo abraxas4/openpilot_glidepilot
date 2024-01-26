@@ -646,29 +646,45 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
   // 차량의 제어 상태 및 파라미터 정보를 포맷팅하여 정보 텍스트로 설정합니다.
   QString infoText;
   infoText.sprintf("TP(%.2f/%.2f) LTP(%.2f/%.2f/%.0f) AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) SCC(%d)",
+                    torque_state.getLatAccelFactor(),
+                    torque_state.getFriction(),
 
-                      torque_state.getLatAccelFactor(),
-                      torque_state.getFriction(),
+                    live_torque_params.getLatAccelFactorRaw(),
+                    live_torque_params.getFrictionCoefficientRaw(),
+                    live_torque_params.getTotalBucketPoints(),
 
-                      live_torque_params.getLatAccelFactorRaw(),
-                      live_torque_params.getFrictionCoefficientRaw(),
-                      live_torque_params.getTotalBucketPoints(),
+                    live_params.getAngleOffsetDeg(),
+                    live_params.getAngleOffsetAverageDeg(),
 
-                      live_params.getAngleOffsetDeg(),
-                      live_params.getAngleOffsetAverageDeg(),
+                    car_control.getSteerRatio(),
+                    car_control.getSteerActuatorDelay(),
 
-                      car_control.getSteerRatio(),
-                      car_control.getSteerActuatorDelay(),
-
-                      car_control.getSccBus()
-                      );
-  // info
+                    car_control.getSccBus());
 
   p.save(); // 현재 페인터 상태를 저장합니다.
+
+#define OPTION_MJ_FONT_SIZE_UP  true  
+#if OPTION_MJ_FONT_SIZE_UP==true
+  // MJ 
+  int font_size = 34 * 1.20; // 원래 글꼴 크기의 120%로 설정
+  p.setFont(InterFont(font_size, QFont::Normal)); // 글꼴 크기를 조정합니다.
+#else
   p.setFont(InterFont(34, QFont::Normal)); // 글꼴과 크기를 설정합니다.
+#endif
   p.setPen(QColor(0xff, 0xff, 0xff, 200)); // 펜의 색상을 설정합니다.
+
+#if OPTION_MJ_FONT_SIZE_UP==true
+  // MJ
+  // 정보 텍스트의 위치를 조정하여 더 크게 보이도록 합니다.
+  int text_width = width() * 1.20; // 텍스트 너비를 20% 늘립니다.
+  int text_x = (width() - text_width) / 2; // 화면 가운데에 텍스트를 배치하기 위해 X 위치를 계산합니다.
+  int text_y = rect().height() - (font_size * 1.20) - 15; // Y 위치를 조정하여 텍스트가 화면 하단에 나타나도록 합니다.
+  // 조정된 위치와 크기로 텍스트를 그립니다.
+  p.drawText(text_x, text_y, text_width, font_size, Qt::AlignLeft | Qt::AlignVCenter, infoText);
+#else
   // 정보 텍스트를 화면 하단에 그립니다.
   p.drawText(rect().left() + 20, rect().height() - 15, infoText);
+#endif  
   p.restore(); // 저장된 페인터 상태를 복구합니다.
 
   drawBottomIcons(p); // 화면 하단에 아이콘들을 그립니다.
