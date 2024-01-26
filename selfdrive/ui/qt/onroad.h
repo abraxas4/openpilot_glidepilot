@@ -20,6 +20,9 @@ const int img_size = (btn_size / 4) * 3;
 #include "selfdrive/ui/qt/screenrecorder/screenrecorder.h"
 
 
+// MJ
+// OnroadAlerts 클래스는 경고 메시지를 업데이트하고 표시하는 기능을 담당합니다.
+
 // ***** onroad widgets *****
 
 class OnroadAlerts : public QWidget {
@@ -66,6 +69,11 @@ private:
 
   QPixmap settings_img;
 };
+
+
+// MJ
+// AnnotatedCameraWidget 클래스는 카메라 위젯을 커스텀하고 추가적인 정보를 표시하는 기능을 담당합니다.
+// 예를 들어, 차선이나 앞차 거리를 그리고 운전자 모니터링 상태 등을 표시합니다.
 
 // container window for the NVG UI
 class AnnotatedCameraWidget : public CameraWidget {

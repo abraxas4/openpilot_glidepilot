@@ -144,10 +144,16 @@ void OnroadWindow::paintEvent(QPaintEvent *event) {
   p.fillRect(rect(), QColor(bg.red(), bg.green(), bg.blue(), 255));
 }
 
+
+// MJ
+// OnroadAlerts 클래스는 경고 메시지를 업데이트하고 표시하는 기능을 담당합니다.
+
 // ***** onroad widgets *****
+
 
 // OnroadAlerts
 void OnroadAlerts::updateAlert(const Alert &a) {
+  // 만약 새로운 경고 메시지가 있다면 화면을 업데이트합니다.
   if (!alert.equal(a)) {
     alert = a;
     update();
@@ -259,6 +265,7 @@ void MapSettingsButton::paintEvent(QPaintEvent *event) {
   drawIcon(p, QPoint(btn_size / 2, btn_size / 2), settings_img, QColor(0, 0, 0, 166), isDown() ? 0.6 : 1.0);
 }
 
+
 AnnotatedCameraWidget::AnnotatedCameraWidget(VisionStreamType type, QWidget* parent) : last_update_params(0), fps_filter(UI_FREQ, 3, 1. / UI_FREQ), CameraWidget("camerad", type, true, parent) {
   pm = std::make_unique<PubMaster, const std::initializer_list<const char *>>({"uiDebug"});
 
@@ -356,6 +363,8 @@ void AnnotatedCameraWidget::updateFrameMat() {
       .translate(-intrinsic_matrix.v[2], -intrinsic_matrix.v[5]);
 }
 
+// MJ
+// 차선을 그리는 함수입니다. 차선의 위치와 확률에 따라 차선을 그리고 색상과 불투명도를 조절합니다.
 void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
   painter.save();
 
@@ -414,39 +423,58 @@ void AnnotatedCameraWidget::drawLaneLines(QPainter &painter, const UIState *s) {
   painter.restore();
 }
 
+// MJ
+// 이 함수는 주행 중인 차량의 UI에, 
+// 앞 차량과의 상대적 거리와 속도에 따라, 다른 시각적 효과를 나타내기 위한 로직을 포함하고 있으며, 
+// 앞 차량이 가까워질수록 더 밝고 눈에 띄는 색상으로 표시됩니다. 
+// 또한 레이더 센서에 의해 감지된 차량인지 아닌지에 따라 색상을 달리하여 사용자에게 시각적 구분을 제공합니다.
 void AnnotatedCameraWidget::drawLead(QPainter &painter, const cereal::RadarState::LeadData::Reader &lead_data, const QPointF &vd, bool is_radar) {
-  painter.save();
+  painter.save(); // QPainter 상태 저장. 이후 restore()가 호출되면 여기서 저장된 상태로 복원됨.
+
+  // 속도와 거리에 따른 색상의 투명도를 계산하기 위한 버퍼 값 설정.
   const float speedBuff = 10.;
   const float leadBuff = 40.;
+
+  // 실제 차량과 앞 차량의 상대 거리와 상대 속도를 가져옴.
   const float d_rel = lead_data.getDRel();
   const float v_rel = lead_data.getVRel();
 
-  float fillAlpha = 0;
-  if (d_rel < leadBuff) {
-    fillAlpha = 255 * (1.0 - (d_rel / leadBuff));
+  float fillAlpha = 0; // 초기 투명도를 0으로 설정.
+  if (d_rel < leadBuff) { // 만약 앞 차량과의 거리가 leadBuff보다 작으면
+    fillAlpha = 255 * (1.0 - (d_rel / leadBuff)); // 거리에 따라 투명도 증가.
     if (v_rel < 0) {
+      // 앞 차량이 접근 중이라면(상대 속도가 음수) 투명도를 추가로 증가.
       fillAlpha += 255 * (-1 * (v_rel / speedBuff));
     }
-    fillAlpha = (int)(fmin(fillAlpha, 255));
+    fillAlpha = (int)(fmin(fillAlpha, 255)); // 투명도를 255 이하로 제한.
   }
 
+  // 앞 차량과의 거리에 따라 아이콘 크기 조정.
   float sz = std::clamp((25 * 30) / (d_rel / 3 + 30), 15.0f, 30.0f) * 2.35;
+  // 아이콘 위치 조정.
   float x = std::clamp((float)vd.x(), 0.f, width() - sz / 2);
   float y = std::fmin(height() - sz * .6, (float)vd.y());
 
+  // 반짝이는 효과를 위한 X와 Y의 오프셋 설정.
   float g_xo = sz / 5;
   float g_yo = sz / 10;
 
+  // 앞 차량 표시를 위한 반짝이는 도형을 그림.
   QPointF glow[] = {{x + (sz * 1.35) + g_xo, y + sz + g_yo}, {x, y - g_yo}, {x - (sz * 1.35) - g_xo, y + sz + g_yo}};
-  painter.setBrush(is_radar ? QColor(86, 121, 216, 255) : QColor(218, 202, 37, 255));
-  painter.drawPolygon(glow, std::size(glow));
+  painter.setBrush(is_radar ? QColor(86, 121, 216, 255) : QColor(218, 202, 37, 255)); // 레이더 여부에 따라 색상 선택.
+  painter.drawPolygon(glow, std::size(glow)); // 반짝이는 효과 도형을 그림.
 
-  // chevron
+  // 체브론 모양의 도형(앞 차량 표시)을 그림.
   QPointF chevron[] = {{x + (sz * 1.25), y + sz}, {x, y}, {x - (sz * 1.25), y + sz}};
-  painter.setBrush(redColor(fillAlpha));
-  painter.drawPolygon(chevron, std::size(chevron));
+  painter.setBrush(redColor(fillAlpha)); // 거리에 따른 색상과 투명도 설정.
+  painter.drawPolygon(chevron, std::size(chevron)); // 체브론 도형을 그림.
+  #if 0
+  chevron이라는 배열은 세 개의 점으로 정의되어 있으며, 
+  이 세 점은 QPainter를 사용하여 하나의 역삼각형을 그리는 데 사용됩니다. 
+  즉, 이 코드에서는 drawPolygon 함수를 통해 하나의 chevron 역삼각형을 그리고 있습니다.
+  #endif
 
-  painter.restore();
+  painter.restore(); // QPainter 상태 복원. 이전에 save()로 저장된 상태로 되돌림.
 }
 
 void AnnotatedCameraWidget::paintGL() {
@@ -557,43 +585,56 @@ void AnnotatedCameraWidget::drawText2(QPainter &p, int x, int y, int flags, cons
   p.drawText(QRect(x, y, rect.width()+1, rect.height()), flags, text);
 }
 
+// MJ
+// 이 코드는 차량의 HUD(Head-Up Display, 헤드업 디스플레이)에 정보를 그리는 함수입니다. 
+// HUD는 운전자가 도로를 주시하면서도 차량의 상태나 운전 관련 정보를 쉽게 볼 수 있게 해주는 시스템입니다. 
+// 이 함수는 차량의 속도, 차선 정보, 앞차와의 거리 등을 그래픽으로 표현합니다.
 void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Reader &model) {
-
+  // 안티앨리어싱을 활성화하여 그래픽의 선이 부드럽게 보이도록 합니다.
   p.setRenderHint(QPainter::Antialiasing);
+  // 펜을 비활성화하여 선을 그리지 않고, 브러시로만 그림을 그립니다.
   p.setPen(Qt::NoPen);
-  p.setOpacity(1.);
+  // 페인터의 불투명도를 완전히 불투명하게 설정합니다.
+  p.setOpacity(1.0);
 
   // Header gradient
+  // 화면 상단에 그라데이션 배경을 그립니다.
   QLinearGradient bg(0, UI_HEADER_HEIGHT - (UI_HEADER_HEIGHT / 2.5), 0, UI_HEADER_HEIGHT);
-  bg.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0.45));
-  bg.setColorAt(1, QColor::fromRgbF(0, 0, 0, 0));
-  p.fillRect(0, 0, width(), UI_HEADER_HEIGHT, bg);
+  bg.setColorAt(0, QColor::fromRgbF(0, 0, 0, 0.45)); // 그라데이션의 시작 색상
+  bg.setColorAt(1, QColor::fromRgbF(0, 0, 0, 0));     // 그라데이션의 끝 색상
+  p.fillRect(0, 0, width(), UI_HEADER_HEIGHT, bg);    // 상단 배경을 그림
 
-  UIState *s = uiState();
+  UIState *s = uiState(); // UI 상태를 가져옵니다.
+  const SubMaster &sm = *(s->sm); // 데이터를 가져올 SubMaster 객체에 대한 참조를 가져옵니다.
 
-  const SubMaster &sm = *(s->sm);
+  // 차선 라인을 그립니다.
   drawLaneLines(p, s);
 
+  // 레이더 상태를 업데이트하고 모델에서 위치 데이터를 가져옵니다.
   auto radar_state = sm["radarState"].getRadarState();
   update_leads(s, radar_state, model.getPosition());
-  auto lead_one = radar_state.getLeadOne();
-  auto lead_two = radar_state.getLeadTwo();
+  
+  // 앞차(Lead) 차량에 대한 정보를 가져와 그립니다.
+  auto lead_one = radar_state.getLeadOne(); // 첫 번째 앞차 데이터
+  auto lead_two = radar_state.getLeadTwo(); // 두 번째 앞차 데이터
   if (lead_two.getStatus()) {
+    // 두 번째 앞차가 감지되었을 때 해당 위치에 역삼각형(chevron)을 그립니다.
     drawLead(p, lead_two, s->scene.lead_vertices[1], s->scene.lead_radar[1]);
   }
   if (lead_one.getStatus()) {
+    // 첫 번째 앞차가 감지되었을 때 해당 위치에 역삼각형(chevron)을 그립니다.
     drawLead(p, lead_one, s->scene.lead_vertices[0], s->scene.lead_radar[0]);
   }
 
-  // MJ : HUD Speed
-  drawMaxSpeed(p);
-  drawSpeed(p);
-  drawSteer(p);
-  drawDeviceState(p);
+  // HUD에 표시될 다양한 정보들을 그립니다.
+  drawMaxSpeed(p);     // 설정된 최고 속도
+  drawSpeed(p);        // 현재 속도
+  drawSteer(p);        // 조향 각도
+  drawDeviceState(p);  // 디바이스 상태 (예: 저장 공간, CPU 온도 등)
   //drawTurnSignals(p);
-  drawGpsStatus(p);
-  drawMisc(p);
-  drawDebugText(p);
+  drawGpsStatus(p);    // GPS 상태
+  drawMisc(p);         // 기타 정보
+  drawDebugText(p);    // 디버깅을 위한 텍스트
 
   const auto controls_state = sm["controlsState"].getControlsState();
   //const auto car_params = sm["carParams"].getCarParams();
@@ -602,6 +643,7 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
   const auto live_torque_params = sm["liveTorqueParameters"].getLiveTorqueParameters();
   const auto torque_state = controls_state.getLateralControlState().getTorqueState();
 
+  // 차량의 제어 상태 및 파라미터 정보를 포맷팅하여 정보 텍스트로 설정합니다.
   QString infoText;
   infoText.sprintf("TP(%.2f/%.2f) LTP(%.2f/%.2f/%.0f) AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) SCC(%d)",
 
@@ -620,17 +662,18 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
 
                       car_control.getSccBus()
                       );
-
   // info
 
-  p.save();
-  p.setFont(InterFont(34, QFont::Normal));
-  p.setPen(QColor(0xff, 0xff, 0xff, 200));
+  p.save(); // 현재 페인터 상태를 저장합니다.
+  p.setFont(InterFont(34, QFont::Normal)); // 글꼴과 크기를 설정합니다.
+  p.setPen(QColor(0xff, 0xff, 0xff, 200)); // 펜의 색상을 설정합니다.
+  // 정보 텍스트를 화면 하단에 그립니다.
   p.drawText(rect().left() + 20, rect().height() - 15, infoText);
-  p.restore();
+  p.restore(); // 저장된 페인터 상태를 복구합니다.
 
-  drawBottomIcons(p);
+  drawBottomIcons(p); // 화면 하단에 아이콘들을 그립니다.
 }
+
 // MJ : color during accel/decel
 void AnnotatedCameraWidget::drawSpeed(QPainter &p) {
   p.save();

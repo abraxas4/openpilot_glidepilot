@@ -63,50 +63,60 @@ struct Alert {
   }
 
   // MJ
+  // 이 코드는 Comma.ai의 openpilot 시스템에서 경고 메시지를 생성하는 함수입니다. 
+  // 이 함수는 현재 상태와 관련된 경고를 만들고, 
+  // 시스템의 상태에 따라 적절한 경고 메시지와 경고 유형을 결정합니다.
   // input 1 : a shared memory object containing control states received from another process.
   // input 2 : the starting frame number when monitoring the alert.
   static Alert get(const SubMaster &sm, uint64_t started_frame) {
-    const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState(); // MJ
-    const uint64_t controls_frame = sm.rcv_frame("controlsState");  // MJ : the reception timestamp of the latest available Control State
+    const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState(); // MJ : "controlsState" 메시지를 받아옵니다.
+    const uint64_t controls_frame = sm.rcv_frame("controlsState");  // MJ : "controlsState"의 가장 최근 수신 프레임 번호를 가져옵니다.
 
-    Alert alert = {};
+    Alert alert = {}; // MJ : 경고 구조체를 초기화합니다.
     // MJ
     // controls_frame keeps track of the latest Control State frame number, 
     // whereas started_frame indicates the reference point for updating the alert information.
-    if (controls_frame >= started_frame) {  // Don't get old alert.
-      alert = {cs.getAlertText1().cStr(), cs.getAlertText2().cStr(),
-               cs.getAlertType().cStr(), cs.getAlertSize(),
+    if (controls_frame >= started_frame) {  // Don't get old alert.   // MJ : 시작 프레임 이후의 경고만 처리하도록 합니다. 오래된 경고는 처리하지 않습니다.
+      alert = {cs.getAlertText1().cStr(), cs.getAlertText2().cStr(),  // MJ : 경고 텍스트와 경고 유형을 설정합니다.
+               cs.getAlertType().cStr(), cs.getAlertSize(), 
                cs.getAlertStatus(),
                cs.getAlertSound()};
     }
 
+    // MJ : "controlsState"가 업데이트되지 않았고, 시작 프레임부터 현재까지 5초 이상 경과했으면 경고를 처리합니다.
+    //    SubMaster는 특정 키에 대해 새 데이터를 받으면 업데이트됨을 표시합니다.
+    //    UI_FREQ는 일반적으로 사용자 인터페이스(UI)의 갱신 주파수를 나타내는 변수
+    //    예를 들어, UI가 60fps로 갱신된다면 UI_FREQ는 60Hz로 설정될 것입니다. 
     if (!sm.updated("controlsState") && (sm.frame - started_frame) > 5 * UI_FREQ) {
-      const int CONTROLS_TIMEOUT = 5;
-      const int controls_missing = (nanos_since_boot() - sm.rcv_time("controlsState")) / 1e9;
+      const int CONTROLS_TIMEOUT = 5; // MJ : 컨트롤 타임아웃을 5초로 설정합니다.
+      const int controls_missing = (nanos_since_boot() - sm.rcv_time("controlsState")) / 1e9;// MJ : 마지막 "controlsState" 수신 시간으로부터 경과한 시간을 계산합니다.
 
+      // MJ : 컨트롤 타임아웃을 처리합니다.
       // Handle controls timeout
       if (controls_frame < started_frame) {
-        // car is started, but controlsState hasn't been seen at all
-        alert = {"openpilot Unavailable", "Waiting for controls to start",
-                 "controlsWaiting", cereal::ControlsState::AlertSize::MID,
+        // MJ : 차량은 시작되었지만, "controlsState"가 전혀 수신되지 않았습니다.
+        // car is started, but controlsState hasn't been seen at all        
+        alert = {"MJ0 openpilot Unavailable", "MJ0 Waiting for controls to start", // MJ : 대기 중인 경고 메시지를 설정합니다.
+                 "MJ0 controlsWaiting", cereal::ControlsState::AlertSize::MID,
                  cereal::ControlsState::AlertStatus::NORMAL,
                  AudibleAlert::NONE};
       } else if (controls_missing > CONTROLS_TIMEOUT && !Hardware::PC()) {
+        // MJ : 차량은 시작되었지만, 컨트롤이 지연되거나 작동이 멈췄습니다.
         // car is started, but controls is lagging or died
         if (cs.getEnabled() && (controls_missing - CONTROLS_TIMEOUT) < 10) {
-          alert = {"TAKE CONTROL IMMEDIATELY", "Controls Unresponsive",
-                   "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
+          alert = {"MJ0 TAKE CONTROL IMMEDIATELY", "MJ0 Controls Unresponsive", // MJ : 즉각적인 조치가 필요한 경고 메시지를 설정합니다.
+                   "MJ0 controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                    cereal::ControlsState::AlertStatus::CRITICAL,
                    AudibleAlert::WARNING_IMMEDIATE};
         } else {
-          alert = {"Controls Unresponsive", "Reboot Device",
-                   "controlsUnresponsivePermanent", cereal::ControlsState::AlertSize::MID,
+          alert = {"MJ0 Controls Unresponsive", "MJ0 Reboot Device",        // MJ : 경고 메시지를 설정하고, 재부팅을 권장합니다.
+                   "MJ0 controlsUnresponsivePermanent", cereal::ControlsState::AlertSize::MID,
                    cereal::ControlsState::AlertStatus::NORMAL,
                    AudibleAlert::NONE};
         }
       }
     }
-    return alert;
+    return alert;// MJ : 생성된 경고를 반환합니다.
   }
 };
 
