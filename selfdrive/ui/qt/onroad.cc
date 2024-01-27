@@ -675,12 +675,21 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
 
 #if OPTION_MJ_FONT_SIZE_UP==true
   // MJ
-  // 정보 텍스트의 위치를 조정하여 더 크게 보이도록 합니다.
-  int text_width = width() * 1.20; // 텍스트 너비를 20% 늘립니다.
-  int text_x = (width() - text_width) / 2; // 화면 가운데에 텍스트를 배치하기 위해 X 위치를 계산합니다.
-  int text_y = rect().height() - (font_size * 1.20) - 15; // Y 위치를 조정하여 텍스트가 화면 하단에 나타나도록 합니다.
+  // 글꼴의 크기를 20% 증가시켜서, 보다 크게 정보를 표시할 수 있도록 하였습니다. 
+  // 또한, 텍스트가 화면에 중앙에 오도록 가로 위치를 조정하였고, 
+  // 텍스트가 하단 가장자리와 충돌하지 않도록 Y 위치를 조정하였습니다.
+  // 정보 텍스트가 화면의 중앙에 오도록 가로 위치를 조정합니다.
+  // 화면의 가로 너비에 대해 텍스트 너비를 20% 늘린 값을 기준으로 가운데 정렬합니다.
+  const int text_width = p.fontMetrics().width(infoText) * 1.20;
+  const int text_x = (width() - text_width) / 2;
+
+  // 텍스트가 화면 하단에 나타나도록 Y 위치를 조정합니다.
+  // 글꼴 크기에 따라 하단에서 여백을 설정합니다.
+  const int text_y = rect().height() - font_size - 15;
+
   // 조정된 위치와 크기로 텍스트를 그립니다.
-  p.drawText(text_x, text_y, text_width, font_size, Qt::AlignLeft | Qt::AlignVCenter, infoText);
+  // Qt::AlignCenter 플래그를 사용하여 수평과 수직 중앙 정렬합니다.
+  p.drawText(QRect(text_x, text_y, text_width, font_size), Qt::AlignCenter, infoText);
 #else
   // 정보 텍스트를 화면 하단에 그립니다.
   p.drawText(rect().left() + 20, rect().height() - 15, infoText);
