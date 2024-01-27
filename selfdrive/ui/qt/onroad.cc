@@ -663,17 +663,11 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
 
   p.save(); // 현재 페인터 상태를 저장합니다.
 
-#define OPTION_MJ_FONT_SIZE_UP  true  
-#if OPTION_MJ_FONT_SIZE_UP==true
   // MJ 
   int font_size = 34 * 1.20; // 원래 글꼴 크기의 120%로 설정
   p.setFont(InterFont(font_size, QFont::Normal)); // 글꼴 크기를 조정합니다.
-#else
-  p.setFont(InterFont(34, QFont::Normal)); // 글꼴과 크기를 설정합니다.
-#endif
   p.setPen(QColor(0xff, 0xff, 0xff, 200)); // 펜의 색상을 설정합니다.
 
-#if OPTION_MJ_FONT_SIZE_UP==true
   // MJ
   // 글꼴의 크기를 20% 증가시켜서, 보다 크게 정보를 표시할 수 있도록 하였습니다. 
   // 또한, 텍스트가 화면에 중앙에 오도록 가로 위치를 조정하였고, 
@@ -690,10 +684,6 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
   // 조정된 위치와 크기로 텍스트를 그립니다.
   // Qt::AlignCenter 플래그를 사용하여 수평과 수직 중앙 정렬합니다.
   p.drawText(QRect(text_x, text_y, text_width, font_size), Qt::AlignCenter, infoText);
-#else
-  // 정보 텍스트를 화면 하단에 그립니다.
-  p.drawText(rect().left() + 20, rect().height() - 15, infoText);
-#endif  
   p.restore(); // 저장된 페인터 상태를 복구합니다.
 
   drawBottomIcons(p); // 화면 하단에 아이콘들을 그립니다.
