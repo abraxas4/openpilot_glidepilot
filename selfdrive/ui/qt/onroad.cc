@@ -644,8 +644,28 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
   const auto torque_state = controls_state.getLateralControlState().getTorqueState();
 
   // 차량의 제어 상태 및 파라미터 정보를 포맷팅하여 정보 텍스트로 설정합니다.
-  QString infoText;
-  infoText.sprintf("TP(%.2f/%.2f) LTP(%.2f/%.2f/%.0f) AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) SCC(%d)",
+  QString infoTextEng; // 영어 정보 텍스트
+  QString infoTextKor; // 한국어 정보 텍스트
+
+  // 영어 로그 문자열 (원본 로그 포맷)
+  infoTextEng.sprintf("TP(%.2f/%.2f) LTP(%.2f/%.2f/%.0f) AO(%.2f/%.2f) SR(%.2f) SAD(%.2f) SCC(%d)",
+                    torque_state.getLatAccelFactor(),
+                    torque_state.getFriction(),
+
+                    live_torque_params.getLatAccelFactorRaw(),
+                    live_torque_params.getFrictionCoefficientRaw(),
+                    live_torque_params.getTotalBucketPoints(),
+
+                    live_params.getAngleOffsetDeg(),
+                    live_params.getAngleOffsetAverageDeg(),
+
+                    car_control.getSteerRatio(),
+                    car_control.getSteerActuatorDelay(),
+
+                    car_control.getSccBus());
+
+  // 한국어 로그 문자열 (번역된 로그 포맷)
+  infoTextKor.sprintf("토크 P(%.2f/%.2f), 토크 I(%.2f/%.2f/%.0f), 각도 오프셋(%.2f/%.2f), 조향비(%.2f), 조향 액츄에이터 지연(%.2f), SCC(%d)",
                     torque_state.getLatAccelFactor(),
                     torque_state.getFriction(),
 
@@ -674,16 +694,17 @@ void AnnotatedCameraWidget::drawHud(QPainter &p, const cereal::ModelDataV2::Read
   // 텍스트가 하단 가장자리와 충돌하지 않도록 Y 위치를 조정하였습니다.
   // 정보 텍스트가 화면의 중앙에 오도록 가로 위치를 조정합니다.
   // 화면의 가로 너비에 대해 텍스트 너비를 20% 늘린 값을 기준으로 가운데 정렬합니다.
-  const int text_width = p.fontMetrics().width(infoText) * 1.20;
-  const int text_x = (width() - text_width) / 2;
 
   // 텍스트가 화면 하단에 나타나도록 Y 위치를 조정합니다.
   // 글꼴 크기에 따라 하단에서 여백을 설정합니다.
-  const int text_y = rect().height() - font_size - 15;
+  int text_y_offset = font_size + 10; // 영어와 한국어 로그 사이의 간격
+  int text_y = rect().height() - (font_size * 2 + text_y_offset + 15); // 영어 로그 시작 위치
+  // 영어 로그를 화면 하단에 그립니다.
+  p.drawText(QRect(0, text_y, width(), font_size), Qt::AlignCenter, infoTextEng);
+  // 한국어 로그를 영어 로그 바로 아래에 그립니다.
+  text_y += font_size + text_y_offset; // 한국어 로그 시작 위치를 조정합니다.
+  p.drawText(QRect(0, text_y, width(), font_size), Qt::AlignCenter, infoTextKor);
 
-  // 조정된 위치와 크기로 텍스트를 그립니다.
-  // Qt::AlignCenter 플래그를 사용하여 수평과 수직 중앙 정렬합니다.
-  p.drawText(QRect(text_x, text_y, text_width, font_size), Qt::AlignCenter, infoText);
   p.restore(); // 저장된 페인터 상태를 복구합니다.
 
   drawBottomIcons(p); // 화면 하단에 아이콘들을 그립니다.
@@ -1327,106 +1348,123 @@ static const QString get_tpms_text(float tpms) {
     return QString(str);
 }
 
+// 이 함수는 차량의 하단 HUD에 여러 아이콘들을 그리는 함수입니다.
 void AnnotatedCameraWidget::drawBottomIcons(QPainter &p) {
-  p.save();
+  p.save(); // 현재 QPainter 상태를 저장합니다.
+  // SubMaster 객체에서 차량 상태 정보를 가져옵니다.
   const SubMaster &sm = *(uiState()->sm);
   const auto car_state = sm["carState"].getCarState();
   const auto car_control = sm["carControl"].getCarControl();
   const auto car_params = (*uiState()->sm)["carParams"].getCarParams();
+
+  int yOffset = 100; // The amount by which you want to raise the icons
+
+  // 타이어 압력 모니터링 시스템(TPMS) 정보를 가져옵니다.
   const auto tpms = car_state.getTpms();
 
-  int n = 1;
+  int n = 1; // 아이콘을 배치하기 위한 인덱스 변수를 초기화합니다.
 
-  // tpms
+  // 타이어 압력 정보가 활성화되어 있을 경우
   if(tpms.getEnabled())
   {
+    // 아이콘의 너비와 높이를 정의합니다.
     const int w = 58;
     const int h = 126;
+    // 아이콘의 X, Y 위치를 계산합니다.
     const int x = radius / 2 + (UI_BORDER_SIZE * 2) + (radius + 50) * n - w/2;
-    const int y = height() - h - 85;
+    const int y = height() - h - 85 - yOffset;
 
-    const float fl = tpms.getFl();
-    const float fr = tpms.getFr();
-    const float rl = tpms.getRl();
-    const float rr = tpms.getRr();
+    // 각 타이어의 압력 값을 가져옵니다.
+    const float fl = tpms.getFl(); // 앞 왼쪽 타이어
+    const float fr = tpms.getFr(); // 앞 오른쪽 타이어
+    const float rl = tpms.getRl(); // 뒤 왼쪽 타이어
+    const float rr = tpms.getRr(); // 뒤 오른쪽 타이어
 
+    // 타이어 압력 아이콘의 불투명도를 설정합니다.
     p.setOpacity(0.8);
+    // 타이어 압력 아이콘을 그립니다.
     p.drawPixmap(x, y, w, h, ic_tire_pressure);
 
-    p.setFont(InterFont(38, QFont::Bold));
-    QFontMetrics fm(p.font());
-    QRect rcFont = fm.boundingRect("9");
+    // 타이어 압력 값에 따라 색상과 텍스트를 설정하고 그립니다.
+    p.setFont(InterFont(38, QFont::Bold)); // 폰트 크기와 스타일 설정
+    QFontMetrics fm(p.font()); // 폰트 메트릭스 정보를 가져옵니다.
+    QRect rcFont = fm.boundingRect("9"); // 숫자 9의 폰트 경계를 계산합니다.
 
-    int center_x = x + 3;
-    int center_y = y + h/2;
+    int center_x = x + 3; // 중앙 X 위치
+    int center_y = y + h/2; // 중앙 Y 위치
+    // 텍스트의 X, Y 마진을 계산합니다.
     const int marginX = (int)(rcFont.width() * 2.7f);
     const int marginY = (int)((h/2 - rcFont.height()) * 0.7f);
 
+    // 타이어 압력 값을 그립니다.
     drawText2(p, center_x-marginX, center_y-marginY-rcFont.height(), Qt::AlignRight, get_tpms_text(fl), get_tpms_color(fl));
     drawText2(p, center_x+marginX, center_y-marginY-rcFont.height(), Qt::AlignLeft, get_tpms_text(fr), get_tpms_color(fr));
     drawText2(p, center_x-marginX, center_y+marginY, Qt::AlignRight, get_tpms_text(rl), get_tpms_color(rl));
     drawText2(p, center_x+marginX, center_y+marginY, Qt::AlignLeft, get_tpms_text(rr), get_tpms_color(rr));
 
-    n++;
+    n++; // 다음 아이콘 위치를 위해 인덱스를 증가시킵니다.
   }
 
+  // 크루즈 컨트롤 간격 조절 아이콘을 그립니다.
   int x = radius / 2 + (UI_BORDER_SIZE * 2) + (radius + 50) * n;
-  const int y = rect().bottom() - UI_FOOTER_HEIGHT / 2 - 10;
-
-  // cruise gap
+  const int y = rect().bottom() - UI_FOOTER_HEIGHT / 2 - 10 - yOffset;
+  // 크루즈 컨트롤 간격 값을 가져옵니다.
   int gap = car_state.getCruiseState().getGapAdjust();
-  int autoTrGap = car_control.getAutoTrGap();
+  int autoTrGap = car_control.getAutoTrGap(); // 자동 조절 간격 값
 
-  p.setPen(Qt::NoPen);
-  p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f)));
-  p.drawEllipse(x - radius / 2, y - radius / 2, radius, radius);
+  // 간격 조절 아이콘의 배경을 그립니다.
+  p.setPen(Qt::NoPen); // 펜 비활성화
+  p.setBrush(QBrush(QColor(0, 0, 0, 255 * .1f))); // 브러시 설정
+  p.drawEllipse(x - radius / 2, y - radius / 2, radius, radius); // 원을 그립니다.
 
-  QString str;
-  float textSize = 50.f;
-  QColor textColor = QColor(255, 255, 255, 200);
+  // 간격 값에 따른 텍스트를 그립니다.
+  QString str; // 텍스트를 담을 문자열 변수
+  float textSize = 50.f; // 텍스트 크기
+  QColor textColor = QColor(255, 255, 255, 200); // 텍스트 색상
 
+  // 간격 값에 따라 다른 텍스트와 색상을 설정합니다.
   if(gap <= 0) {
-    str = "N/A";
+    str = "N/A";  // 정보 없음
   }
   else if(gap == autoTrGap) {
-    str = "AUTO";
-    textColor = QColor(120, 255, 120, 200);
+    str = "AUTO"; // 자동 간격 조정
+    textColor = QColor(120, 255, 120, 200); // 색상 변경
   }
   else {
-    str.sprintf("%d", (int)gap);
-    textColor = QColor(120, 255, 120, 200);
-    textSize = 70.f;
+    str.sprintf("%d", (int)gap); // 간격 값
+    textColor = QColor(120, 255, 120, 200); // 색상 변경
+    textSize = 70.f; // 크기 변경
   }
 
-  p.setFont(InterFont(35, QFont::Bold));
-  drawText(p, x, y-20, "GAP", 200);
+  p.setFont(InterFont(35, QFont::Bold)); // 폰트 설정
+  drawText(p, x, y-20, "GAP", 200); // "GAP" 텍스트를 그립니다.
 
-  p.setFont(InterFont(textSize, QFont::Bold));
-  drawTextWithColor(p, x, y+50, str, textColor);
-  n++;
+  p.setFont(InterFont(textSize, QFont::Bold)); // 텍스트 크기 재설정
+  drawTextWithColor(p, x, y+50, str, textColor); // 설정된 텍스트와 색상으로 간격 값을 그립니다.
+  n++; // 아이콘 인덱스 증가
 
-  // brake
+  // 브레이크 아이콘
   x = radius / 2 + (UI_BORDER_SIZE * 2) + (radius + 50) * n;
   bool brake_valid = car_state.getBrakeLights();
-  float img_alpha = brake_valid ? 1.0f : 0.15f;
-  float bg_alpha = brake_valid ? 0.3f : 0.1f;
+  float img_alpha = brake_valid ? 1.0f : 0.15f; // 브레이크 상태에 따른 아이콘의 투명도 설정
+  float bg_alpha = brake_valid ? 0.3f : 0.1f;   // 브레이크 상태에 따른 배경 투명도 설정
   drawIcon(p, QPoint(x, y), ic_brake, QColor(0, 0, 0, (255 * bg_alpha)), img_alpha);
   n++;
 
-  // auto hold
+  // auto hold icon.
   if(car_params.getHasAutoHold()) {
     int autohold = car_state.getAutoHold();
     if(autohold >= 0) {
       x = radius / 2 + (UI_BORDER_SIZE * 2) + (radius + 50) * n;
-      img_alpha = autohold > 0 ? 1.0f : 0.15f;
-      bg_alpha = autohold > 0 ? 0.3f : 0.1f;
+      img_alpha = autohold > 0 ? 1.0f : 0.15f;  // 오토 홀드 활성화 상태에 따른 아이콘의 투명도
+      bg_alpha = autohold > 0 ? 0.3f : 0.1f;    // 오토 홀드 활성화 상태에 따른 배경 투명도
       drawIcon(p, QPoint(x, y), autohold > 1 ? ic_autohold_warning : ic_autohold_active,
               QColor(0, 0, 0, (255 * bg_alpha)), img_alpha);
     }
     n++;
   }
 
-  p.restore();
+  p.restore(); // 페인터 상태 복원
 }
 
 void AnnotatedCameraWidget::drawMisc(QPainter &p) {

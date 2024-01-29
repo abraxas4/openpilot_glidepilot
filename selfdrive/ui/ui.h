@@ -64,8 +64,17 @@ struct Alert {
 
   // MJ
   // 이 코드는 Comma.ai의 openpilot 시스템에서 경고 메시지를 생성하는 함수입니다. 
-  // 이 함수는 현재 상태와 관련된 경고를 만들고, 
-  // 시스템의 상태에 따라 적절한 경고 메시지와 경고 유형을 결정합니다.
+
+  // 함수는 SubMaster 객체로부터 제어 상태 데이터를 받아 이를 기반으로 현재 상황에 맞는 경고를 생성합니다.
+  // 시작 프레임은 경고를 갱신하기 위한 참조점으로 사용되며, 
+  // 이는 시스템이 적절한 타이밍에 경고를 표시할 수 있도록 합니다.
+  // 만약 제어 상태의 프레임 번호가 시작 프레임보다 크거나 같다면, 오래된 경고는 무시되고 최신 경고만을 표시합니다.
+  // 만약 "controlsState"가 업데이트되지 않았고, 시작 프레임부터 현재까지 5초 이상 경과했다면,
+  // 이는 컨트롤 메시지가 수신되지 않고 있음을 의미하며, 사용자에게 즉각적인 조치가 필요한 상태를 알립니다.
+  // 이러한 상황에서는 사용자가 직접 차량을 제어해야 하며, 시스템은 사용자에게 경고음과 함께 이를 알립니다.
+  // 만약 컨트롤 메시지가 전혀 수신되지 않았다면, 사용자에게 openpilot이 사용 불가능하다는 메시지를 표시하고,
+  // 컨트롤이 시작될 때까지 기다리라는 메시지를 표시합니다. 이는 차량이 시작된 후 openpilot 시스템이 부팅되는 동안
+  // 일반적으로 발생할 수 있는 상황입니다.
   // input 1 : a shared memory object containing control states received from another process.
   // input 2 : the starting frame number when monitoring the alert.
   static Alert get(const SubMaster &sm, uint64_t started_frame) {
@@ -94,10 +103,10 @@ struct Alert {
       // MJ : 컨트롤 타임아웃을 처리합니다.
       // Handle controls timeout
       if (controls_frame < started_frame) {
-        // MJ : 차량은 시작되었지만, "controlsState"가 전혀 수신되지 않았습니다.
+        // MJ : 차량은 시작되었지만, "controlsState"가 전혀 수신되지 않았습니다. -> POPO시 항상 발생.
         // car is started, but controlsState hasn't been seen at all        
-        alert = {"MJ0 openpilot Unavailable", "MJ0 Waiting for controls to start", // MJ : 대기 중인 경고 메시지를 설정합니다.
-                 "MJ0 controlsWaiting", cereal::ControlsState::AlertSize::MID,
+        alert = {"MJ0 openpilot Unavailable", "MJ0 Waiting for controls to start",
+                 "controlsWaiting", cereal::ControlsState::AlertSize::MID,
                  cereal::ControlsState::AlertStatus::NORMAL,
                  AudibleAlert::NONE};
       } else if (controls_missing > CONTROLS_TIMEOUT && !Hardware::PC()) {
@@ -105,12 +114,12 @@ struct Alert {
         // car is started, but controls is lagging or died
         if (cs.getEnabled() && (controls_missing - CONTROLS_TIMEOUT) < 10) {
           alert = {"MJ0 TAKE CONTROL IMMEDIATELY", "MJ0 Controls Unresponsive", // MJ : 즉각적인 조치가 필요한 경고 메시지를 설정합니다.
-                   "MJ0 controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
+                   "controlsUnresponsive", cereal::ControlsState::AlertSize::FULL,
                    cereal::ControlsState::AlertStatus::CRITICAL,
                    AudibleAlert::WARNING_IMMEDIATE};
         } else {
           alert = {"MJ0 Controls Unresponsive", "MJ0 Reboot Device",        // MJ : 경고 메시지를 설정하고, 재부팅을 권장합니다.
-                   "MJ0 controlsUnresponsivePermanent", cereal::ControlsState::AlertSize::MID,
+                   "controlsUnresponsivePermanent", cereal::ControlsState::AlertSize::MID,
                    cereal::ControlsState::AlertStatus::NORMAL,
                    AudibleAlert::NONE};
         }
