@@ -759,38 +759,72 @@ QRect getRect(QPainter &p, int flags, QString text) {
   return fm.boundingRect(init_rect, flags, text);
 }
 
-void AnnotatedCameraWidget::drawMaxSpeed(QPainter &p) {
-  p.save();
+#if 0
+크루즈 컨트롤 설정 속도 표시:
+bool is_cruise_set = cruiseState.getEnabled();
+이 조건은 크루즈 컨트롤이 활성화되어 있는지를 확인합니다. 
+is_cruise_set이 
+  true이면 크루즈 컨트롤로 설정된 최고 속도(cruiseMaxSpeed)를 표시하고, 
+  false이면 "N/A"로 표시하여 사용자에게 크루즈 컨트롤이 설정되지 않았음을 알립니다.
 
+적용된 최대 속도 표시:
+이 부분은 시스템이 자동으로 적용한 최대 속도(applyMaxSpeed)를 표시합니다. 
+크루즈 컨트롤이 설정되어 있고 applyMaxSpeed가 0보다 클 경우 해당 속도를 표시하고, 
+그렇지 않으면 "MAX"로 표시합니다.
+
+메트릭 단위 변환:
+bool is_metric = s->scene.is_metric;
+사용자가 선택한 단위에 따라 속도 값을 km/h 또는 mph로 변환하여 표시합니다. 
+is_metric이 true면 km/h 단위를, false면 mph 단위를 사용합니다.
+
+내비게이션 데이터 표시:
+카메라 또는 구간 제한 속도(camLimitSpeed, sectionLimitSpeed)와 관련된 데이터를 표시합니다. 
+각각의 제한 속도와 남은 거리(camLimitSpeedLeftDist, sectionLeftDist)를 확인하여 화면에 그립니다.
+
+내비게이션 디스플레이 활성화 상태 표시:
+int activeNDA = navi_data.getActive();
+내비게이션 디스플레이 어시스트(NDA)가 활성화되어 있을 경우 관련 아이콘을 그립니다. 
+activeNDA 값에 따라 NDA 또는 HDA 아이콘을 화면에 표시합니다.
+#endif
+void AnnotatedCameraWidget::drawMaxSpeed(QPainter &p) {
+  p.save(); // QPainter 상태를 저장합니다.
+
+  // UI 상태 및 데이터를 가져옵니다.
   UIState *s = uiState();
   const SubMaster &sm = *(s->sm);
-  const auto car_control = sm["carControl"].getCarControl();
-  const auto car_state = sm["carState"].getCarState();
-  //const auto car_params = sm["carParams"].getCarParams();
-  const auto navi_data = sm["naviData"].getNaviData();
+  const auto car_control = sm["carControl"].getCarControl(); // 차량 제어 데이터를 가져옵니다.
+  const auto car_state = sm["carState"].getCarState(); // 차량 상태 데이터를 가져옵니다.
+  //const auto car_params = sm["carParams"].getCarParams(); // 차량 파라미터 데이터를 가져옵니다(현재 주석 처리).
+  const auto navi_data = sm["naviData"].getNaviData(); // 내비게이션 데이터를 가져옵니다.
 
+  // 크루즈 컨트롤 상태를 가져옵니다.
   const auto cruiseState = car_state.getCruiseState();
 
-  bool is_metric = s->scene.is_metric;
+  // 메트릭 단위 사용 여부를 확인합니다.
+  bool is_metric = s->scene.is_metric; // 메트릭 단위 사용 여부 (true: km/h, false: mph)
   //int scc_bus = car_params.getSccBus();
 
-  // kph
-  float applyMaxSpeed = car_control.getApplyMaxSpeed();
-  float cruiseMaxSpeed = car_control.getCruiseMaxSpeed();
+  // kph로 속도 값을 가져옵니다.
+  float applyMaxSpeed = car_control.getApplyMaxSpeed(); // 적용할 최고 속도
+  float cruiseMaxSpeed = car_control.getCruiseMaxSpeed(); // 크루즈 컨트롤로 설정된 최고 속도
 
-  bool is_cruise_set = cruiseState.getEnabled();
+  // 크루즈 컨트롤 설정 여부를 확인합니다.
+  bool is_cruise_set = cruiseState.getEnabled(); // 크루즈 컨트롤이 설정되었는지 여부
 
+  // 내비게이션 관련 데이터를 가져옵니다.
   int activeNDA = navi_data.getActive();
-  int roadLimitSpeed = navi_data.getRoadLimitSpeed();
-  int camLimitSpeed = navi_data.getCamLimitSpeed();
-  int camLimitSpeedLeftDist = navi_data.getCamLimitSpeedLeftDist();
-  int sectionLimitSpeed = navi_data.getSectionLimitSpeed();
-  int sectionLeftDist = navi_data.getSectionLeftDist();
-  int isNda2 = navi_data.getIsNda2();
+  int roadLimitSpeed = navi_data.getRoadLimitSpeed(); // 도로 제한 속도
+  int camLimitSpeed = navi_data.getCamLimitSpeed(); // 카메라 제한 속도
+  int camLimitSpeedLeftDist = navi_data.getCamLimitSpeedLeftDist(); // 카메라 제한 속도까지 남은 거리
+  int sectionLimitSpeed = navi_data.getSectionLimitSpeed(); // 구간 제한 속도
+  int sectionLeftDist = navi_data.getSectionLeftDist(); // 구간 제한 속도까지 남은 거리
+  int isNda2 = navi_data.getIsNda2(); // NDA2 활성화 여부
 
+  // 최고 속도와 남은 거리를 초기화합니다.
   int limit_speed = 0;
   int left_dist = 0;
 
+  // 카메라나 구간 제한 속도가 설정되어 있다면 해당 값으로 설정합니다.
   if(camLimitSpeed > 0 && camLimitSpeedLeftDist > 0) {
     limit_speed = camLimitSpeed;
     left_dist = camLimitSpeedLeftDist;
@@ -800,114 +834,94 @@ void AnnotatedCameraWidget::drawMaxSpeed(QPainter &p) {
     left_dist = sectionLeftDist;
   }
 
+  // NDA가 활성화되어 있다면 관련 이미지를 그립니다.
   if(activeNDA > 0) {
-      p.setOpacity(1.f);
+      p.setOpacity(1.f); // 투명도 설정
+      // NDA 아이콘을 그립니다.
       if(isNda2) {
+        // 아이콘 크기 및 위치 설정
         int w = 155;
         int h = 54;
         int x = (width() + (UI_BORDER_SIZE*2))/2 - w/2 - UI_BORDER_SIZE;
         int y = 40 - UI_BORDER_SIZE;
+        // 아이콘을 그립니다.
         p.drawPixmap(x, y, w, h, activeNDA == 1 ? ic_nda2 : ic_hda2);
       }
       else {
+        // 아이콘 크기 및 위치 설정
         int w = 120;
         int h = 54;
         int x = (width() + (UI_BORDER_SIZE*2))/2 - w/2 - UI_BORDER_SIZE;
         int y = 40 - UI_BORDER_SIZE;
+        // 아이콘을 그립니다.
         p.drawPixmap(x, y, w, h, activeNDA == 1 ? ic_nda : ic_hda);
       }
   }
   else {
+    // NDA가 활성화되어 있지 않다면 차량 상태에서 내비게이션 속도 제한을 가져옵니다.
     limit_speed = car_state.getNavSpeedLimit();
   }
 
-
+  // UI의 시작 위치를 설정합니다.
   const int x_start = 30;
   const int y_start = 30;
 
+  // 속도 표시판의 크기를 설정합니다.
   int board_width = 210;
   int board_height = 384;
 
+  // 모서리의 둥근 정도를 설정합니다.
   const int corner_radius = 32;
   int max_speed_height = 210;
 
+  // 배경 색상과 투명도를 설정합니다.
   QColor bgColor = QColor(0, 0, 0, 166);
-
+  QString str; // 표시할 문자열을 저장할 변수
+  // 크루즈 컨트롤 설정 속도와 적용된 최대 속도를 왼쪽 정렬로 그립니다.
+  // "SET" 부분은 원래 크기로 유지하고 "km/h"와 "mph" 부분은 더 작게 표시합니다.
   {
-    // draw board
-    QPainterPath path;
-    path.setFillRule(Qt::WindingFill);
+    QFont original_font = p.font(); // 원래 폰트를 저장해둡니다.    
+    QFont speed_font = InterFont(50, QFont::Bold); // 속도를 나타내는 폰트를 설정합니다.
+    QFont unit_font = InterFont(25, QFont::Bold); // 단위(km/h)를 나타내는 폰트를 설정합니다 (속도 폰트의 50%).
 
-    if(limit_speed > 0) {
-      board_width = limit_speed < 100 ? 210 : 230;
-      board_height = max_speed_height + board_width;
-
-      path.addRoundedRect(QRectF(x_start, y_start, board_width, board_height-board_width/2), corner_radius, corner_radius);
-      path.addRoundedRect(QRectF(x_start, y_start+corner_radius, board_width, board_height-corner_radius), board_width/2, board_width/2);
-    }
-    else if(roadLimitSpeed > 0 && roadLimitSpeed < 200) {
-      board_height = 485;
-      path.addRoundedRect(QRectF(x_start, y_start, board_width, board_height), corner_radius, corner_radius);
-    }
-    else {
-      max_speed_height = 235;
-      board_height = max_speed_height;
-      path.addRoundedRect(QRectF(x_start, y_start, board_width, board_height), corner_radius, corner_radius);
-    }
-
-    p.setPen(Qt::NoPen);
-    p.fillPath(path.simplified(), bgColor);
-  }
-
-  QString str;
-
-  // Max Speed
-  {
-    p.setPen(QColor(255, 255, 255, 230));
-
+    // "SET" 문자열을 그립니다.
     if(is_cruise_set) {
-      p.setFont(InterFont(80, QFont::Bold));
-
-      if(is_metric)
-        str.sprintf( "%d", (int)(cruiseMaxSpeed + 0.5));
-      else
-        str.sprintf( "%d", (int)(cruiseMaxSpeed*KM_TO_MILE + 0.5));
+      float display_speed = is_metric ? cruiseMaxSpeed : cruiseMaxSpeed * KM_TO_MILE;
+      str.sprintf("SET=%d", (int)(display_speed + 0.5)); // 속도 값을 문자열로 설정합니다.
+    } else {
+      str = "SET=N/A"; // 크루즈 컨트롤이 설정되지 않았을 때
     }
-    else {
-      p.setFont(InterFont(60, QFont::Bold));
-      str = "N/A";
-    }
+    p.setFont(speed_font); // 속도 폰트를 적용합니다.
+    p.setPen(QColor(255, 255, 255, 230)); // 펜 색상 및 투명도 설정
+    p.drawText(QRect(x_start, y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, str);
 
-    QRect speed_rect = getRect(p, Qt::AlignCenter, str);
-    QRect max_speed_rect(x_start, y_start, board_width, max_speed_height/2);
-    speed_rect.moveCenter({max_speed_rect.center().x(), 0});
-    speed_rect.moveTop(max_speed_rect.top() + 35);
-    p.drawText(speed_rect, Qt::AlignCenter | Qt::AlignVCenter, str);
-  }
+    // "km/h" 단위를 그립니다.
+    p.setFont(unit_font); // 단위 폰트를 적용합니다.
+    str = is_metric ? "km/h" : "mph";
+    int unit_str_width = p.fontMetrics().horizontalAdvance(str);
+    p.drawText(QRect(x_start + p.fontMetrics().horizontalAdvance(str) + 5, y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, str);
 
-
-  // applyMaxSpeed
-  {
-    p.setPen(QColor(255, 255, 255, 180));
-
-    p.setFont(InterFont(50, QFont::Bold));
+    // "APPLIED" 문자열을 그립니다.
+    int second_line_y_start = y_start + 50 + p.fontMetrics().height(); // Adjust Y start for the second line to avoid overlap
     if(is_cruise_set && applyMaxSpeed > 0) {
-      if(is_metric)
-        str.sprintf( "%d", (int)(applyMaxSpeed + 0.5));
-      else
-        str.sprintf( "%d", (int)(applyMaxSpeed*KM_TO_MILE + 0.5));
+      float display_speed = is_metric ? applyMaxSpeed : applyMaxSpeed * KM_TO_MILE;
+      str.sprintf("APPLIED=%d", (int)(display_speed + 0.5)); // 속도 값을 문자열로 설정합니다.
+    } else {
+      str = "APPLIED=MAX"; // 적용된 최대 속도가 설정되지 않았을 때
     }
-    else {
-      str = "MAX";
-    }
+    p.setFont(speed_font); // 속도 폰트를 적용합니다.
+    p.setPen(QColor(255, 255, 255, 180)); // 펜 색상 및 투명도 설정
+    p.drawText(QRect(x_start, second_line_y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, str);
 
-    QRect speed_rect = getRect(p, Qt::AlignCenter, str);
-    QRect max_speed_rect(x_start, y_start + max_speed_height/2, board_width, max_speed_height/2);
-    speed_rect.moveCenter({max_speed_rect.center().x(), 0});
-    speed_rect.moveTop(max_speed_rect.top() + 24);
-    p.drawText(speed_rect, Qt::AlignCenter | Qt::AlignVCenter, str);
+    // "km/h" 단위를 그립니다.
+    p.setFont(unit_font); // 단위 폰트를 적용합니다.
+    p.drawText(QRect(x_start + unit_str_width + 5, second_line_y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, str);
+
+    // 폰트를 원래대로 복구합니다.
+    p.setFont(original_font);
+
+    p.restore();
   }
-
   //
   if(limit_speed > 0) {
     QRect board_rect = QRect(x_start, y_start+board_height-board_width, board_width, board_width);
@@ -1012,7 +1026,7 @@ void AnnotatedCameraWidget::drawMaxSpeed(QPainter &p) {
     }
   }
 
-  p.restore();
+  p.restore();//상대코드 : p.save(); 
 }
 
 void AnnotatedCameraWidget::drawSteer(QPainter &p) {
