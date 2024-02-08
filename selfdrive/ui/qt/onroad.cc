@@ -880,47 +880,56 @@ void AnnotatedCameraWidget::drawMaxSpeed(QPainter &p) {
   // 크루즈 컨트롤 설정 속도와 적용된 최대 속도를 왼쪽 정렬로 그립니다.
   // "SET" 부분은 원래 크기로 유지하고 "km/h"와 "mph" 부분은 더 작게 표시합니다.
   {
-    QFont original_font = p.font(); // 원래 폰트를 저장해둡니다.    
-    QFont speed_font = InterFont(50, QFont::Bold); // 속도를 나타내는 폰트를 설정합니다.
-    QFont unit_font = InterFont(25, QFont::Bold); // 단위(km/h)를 나타내는 폰트를 설정합니다 (속도 폰트의 50%).
+    QFont original_font = p.font(); // Save the original font.
+    QFont speed_font = InterFont(50, QFont::Bold); // Font for displaying the speed.
+    QFont unit_font = InterFont(25, QFont::Bold); // Font for displaying the unit (km/h), 50% of the speed font size.
 
-    // "SET" 문자열을 그립니다.
+    QString speed_str; // Variable to hold the speed string.
+    QString unit_str = is_metric ? "km/h" : "mph"; // Unit string based on metric or imperial.
+
+    // Draw the "SET" string.
     if(is_cruise_set) {
       float display_speed = is_metric ? cruiseMaxSpeed : cruiseMaxSpeed * KM_TO_MILE;
-      str.sprintf("SET=%d", (int)(display_speed + 0.5)); // 속도 값을 문자열로 설정합니다.
+      speed_str.sprintf("SET=%d", (int)(display_speed + 0.5)); // Format the speed value into a string.
     } else {
-      str = "SET=N/A"; // 크루즈 컨트롤이 설정되지 않았을 때
+      speed_str = "SET=N/A"; // If cruise control is not set.
     }
-    p.setFont(speed_font); // 속도 폰트를 적용합니다.
-    p.setPen(QColor(255, 255, 255, 230)); // 펜 색상 및 투명도 설정
-    p.drawText(QRect(x_start, y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, str);
+    p.setFont(speed_font); // Apply the speed font.
+    p.setPen(QColor(255, 255, 255, 230)); // Set the pen color and opacity.
+    p.drawText(QRect(x_start, y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, speed_str);
 
-    // "km/h" 단위를 그립니다.
-    p.setFont(unit_font); // 단위 폰트를 적용합니다.
-    str = is_metric ? "km/h" : "mph";
-    int unit_str_width = p.fontMetrics().horizontalAdvance(str);
-    p.drawText(QRect(x_start + p.fontMetrics().horizontalAdvance(str) + 5, y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, str);
+    // Calculate the width of the "SET" speed string and add some padding for the unit text.
+    int speed_str_width = p.fontMetrics().horizontalAdvance(speed_str) + 10; // Adding 10 for padding
 
-    // "APPLIED" 문자열을 그립니다.
-    int second_line_y_start = y_start + 50 + p.fontMetrics().height(); // Adjust Y start for the second line to avoid overlap
+    // Draw the unit string ("km/h" or "mph") to the right of the "SET" speed string.
+    p.setFont(unit_font); // Apply the unit font.
+    p.drawText(QRect(x_start + speed_str_width, y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, unit_str);
+
+    // Draw the "APPLIED" string.
+    int second_line_y_start = y_start + 50 + p.fontMetrics().height(); // Adjust Y start for the second line to avoid overlap.
     if(is_cruise_set && applyMaxSpeed > 0) {
       float display_speed = is_metric ? applyMaxSpeed : applyMaxSpeed * KM_TO_MILE;
-      str.sprintf("APPLIED=%d", (int)(display_speed + 0.5)); // 속도 값을 문자열로 설정합니다.
+      speed_str.sprintf("APPLIED=%d", (int)(display_speed + 0.5)); // Format the applied speed into a string.
     } else {
-      str = "APPLIED=MAX"; // 적용된 최대 속도가 설정되지 않았을 때
+      speed_str = "APPLIED=MAX"; // If the applied max speed is not set.
     }
-    p.setFont(speed_font); // 속도 폰트를 적용합니다.
-    p.setPen(QColor(255, 255, 255, 180)); // 펜 색상 및 투명도 설정
-    p.drawText(QRect(x_start, second_line_y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, str);
+    p.setFont(speed_font); // Apply the speed font.
+    p.setPen(QColor(255, 255, 255, 180)); // Set the pen color and opacity.
+    p.drawText(QRect(x_start, second_line_y_start, 1000, 50), Qt::AlignLeft | Qt::AlignVCenter, speed_str);
 
-    // "km/h" 단위를 그립니다.
-    p.setFont(unit_font); // 단위 폰트를 적용합니다.
-    p.drawText(QRect(x_start + unit_str_width + 5, second_line_y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, str);
+    // Calculate the width of the "APPLIED" speed string and add some padding for the unit text.
+    speed_str_width = p.fontMetrics().horizontalAdvance(speed_str) + 10; // Adding 10 for padding
 
-    // 폰트를 원래대로 복구합니다.
+    // Draw the unit string ("km/h" or "mph") to the right of the "APPLIED" speed string.
+    p.setFont(unit_font); // Apply the unit font.
+    p.drawText(QRect(x_start + speed_str_width, second_line_y_start, 1000, 25), Qt::AlignLeft | Qt::AlignVCenter, unit_str);
+
+    // Restore the original font.
     p.setFont(original_font);
 
     p.restore();
+
+
   }
   //
   if(limit_speed > 0) {
